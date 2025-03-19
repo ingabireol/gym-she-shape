@@ -1,8 +1,6 @@
 package com.sheshape.controller;
 
-import com.sheshape.dto.AuthRequest;
-import com.sheshape.dto.AuthResponse;
-import com.sheshape.dto.RegistrationRequest;
+import com.sheshape.dto.AuthDTO;
 import com.sheshape.dto.UserDto;
 import com.sheshape.service.AuthService;
 import com.sheshape.service.UserService;
@@ -27,13 +25,13 @@ public class UserController {
     }
 
     @PostMapping("/auth/register")
-    public ResponseEntity<UserDto> register(@Valid @RequestBody RegistrationRequest request) {
+    public ResponseEntity<UserDto> register(@Valid @RequestBody AuthDTO.RegistrationRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(authService.register(request));
     }
 
     @PostMapping("/auth/login")
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest request) {
+    public ResponseEntity<AuthDTO.AuthResponse> login(@Valid @RequestBody AuthDTO.AuthRequest request) {
         return ResponseEntity.ok(authService.login(request));
     }
 
