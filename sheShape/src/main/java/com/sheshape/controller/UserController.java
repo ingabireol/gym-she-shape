@@ -1,11 +1,11 @@
 package com.sheshape.controller;
 
-import com.sheshape.dto.AuthDTO;
+//import com.sheshape.dto.AuthDTO;
 import com.sheshape.dto.UserDto;
 import com.sheshape.service.AuthService;
 import com.sheshape.service.UserService;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
+//import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -17,28 +17,28 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
-    private final AuthService authService;
+//    private final AuthService authService;
 
     public UserController(UserService userService, AuthService authService) {
         this.userService = userService;
-        this.authService = authService;
+//        this.authService = authService;
     }
 
-    @PostMapping("/auth/register")
-    public ResponseEntity<UserDto> register(@Valid @RequestBody AuthDTO.RegistrationRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(authService.register(request));
-    }
+//    @PostMapping("/auth/register")
+//    public ResponseEntity<UserDto> register(@Valid @RequestBody AuthDTO.RegistrationRequest request) {
+//        return ResponseEntity.status(HttpStatus.CREATED)
+//                .body(authService.register(request));
+//    }
 
-    @PostMapping("/auth/login")
-    public ResponseEntity<AuthDTO.AuthResponse> login(@Valid @RequestBody AuthDTO.AuthRequest request) {
-        return ResponseEntity.ok(authService.login(request));
-    }
+//    @PostMapping("/auth/login")
+//    public ResponseEntity<AuthDTO.AuthResponse> login(@Valid @RequestBody AuthDTO.AuthRequest request) {
+//        return ResponseEntity.ok(authService.login(request));
+//    }
 
-    @GetMapping("/auth/me")
-    public ResponseEntity<UserDto> getCurrentUser() {
-        return ResponseEntity.ok(userService.getCurrentUser());
-    }
+//    @GetMapping("/auth/me")
+//    public ResponseEntity<UserDto> getCurrentUser() {
+//        return ResponseEntity.ok(userService.getCurrentUser());
+//    }
 
     @GetMapping("/users")
     @PreAuthorize("hasRole('ADMIN')")

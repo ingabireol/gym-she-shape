@@ -1,8 +1,7 @@
 package com.sheshape.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sheshape.dto.AuthRequest;
-import com.sheshape.dto.AuthResponse;
+import com.sheshape.dto.AuthDTO;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,18 +24,19 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
 
-    public JwtAuthenticationFilter(AuthenticationManager authenticationManager) {
+
+    public JwtAuthenticationFilter(AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
         this.authenticationManager = authenticationManager;
-        this.jwtUtil = new JwtUtil(); // Will be injected by Spring in production
-        setFilterProcessesUrl("/api/auth/login"); // Set login URL
+        this.jwtUtil = jwtUtil;
+        setFilterProcessesUrl("/api/auth/login");
     }
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) 
             throws AuthenticationException {
         try {
-            AuthRequest authRequest = new ObjectMapper()
-                    .readValue(request.getInputStream(), AuthRequest.class);
+            AuthDTO.AuthRequest authRequest = new ObjectMapper()
+                    .readValue(request.getInputStream(), AuthDTO.AuthRequest.class);
 
             return authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -63,7 +63,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .collect(Collectors.joining(","));
         
         // Create auth response
-        AuthResponse authResponse = new AuthResponse(token, authorities);
+        AuthDTO.AuthResponse authResponse = new AuthDTO.AuthResponse(token, authorities);
         
         // Write response
         response.setContentType("application/json");
