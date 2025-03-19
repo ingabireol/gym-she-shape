@@ -65,9 +65,13 @@ public class SecurityConfig {
                         // Nutritionist endpoints
                         .requestMatchers("/api/nutrition/plans/new").hasRole("NUTRITIONIST")
                         .requestMatchers("/api/nutrition/plans/{id}/edit").hasRole("NUTRITIONIST")
-                        
+                        // Swagger UI endpoints
+//                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+
+                        .requestMatchers("/swagger-ui/**","/swagger-ui.html", "/swagger-resources/**", "/v3/api-docs/**", "/v2/api-docs/**","/configuration/ui","/configuration/security","/webjars/**").permitAll()
                         // Authenticated endpoints
                         .anyRequest().authenticated()
+
                 )
                 .addFilter(jwtAuthenticationFilter)
                 .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class)

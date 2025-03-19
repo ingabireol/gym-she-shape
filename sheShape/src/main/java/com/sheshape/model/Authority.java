@@ -4,9 +4,7 @@ import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Table(name = "authorities")
@@ -21,7 +19,9 @@ public class Authority {
     
     @Column(nullable = false, unique = true)
     private String name;
-    
+
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @ManyToMany(mappedBy = "authorities")
     private Set<User> users = new HashSet<>();
     

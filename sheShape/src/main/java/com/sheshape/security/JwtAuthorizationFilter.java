@@ -29,26 +29,30 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        
         try {
             String jwt = getJwtFromRequest(request);
+            System.out.println("Here is the jwt: " + jwt);
 
-            if (StringUtils.hasText(jwt) && jwtUtil.validateToken(jwt, null)) {
+            if (StringUtils.hasText(jwt)) {
+                // Extract username first without validation
                 String username = jwtUtil.extractUsername(jwt);
 
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                
-                // Second validation with actual user details
-                if (jwtUtil.validateToken(jwt, userDetails)) {
-                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                            userDetails, null, userDetails.getAuthorities());
-                    
-                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                // Only proceed if we can extract a username
+                if (username != null) {
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+                    // Now validate the token with the actual user details
+                    if (userDetails != null && jwtUtil.validateToken(jwt, userDetails)) {
+                        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                                userDetails, null, userDetails.getAuthorities());
+                        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                        SecurityContextHolder.getContext().setAuthentication(authentication);
+                    }
                 }
             }
         } catch (Exception e) {
             logger.error("Cannot set user authentication: {}", e);
+            // Don't throw the exception, just log it and continue
         }
 
         filterChain.doFilter(request, response);
