@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useForm } from 'react-hook-form';
@@ -141,9 +141,9 @@ export function ProfileSetupForm() {
   const watchedValues = watch();
   
   // Update progress when form values change
-  useState(() => {
+  useEffect(() => {
     updateProgress();
-  });
+  }, [watchedValues]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -316,6 +316,26 @@ export function ProfileSetupForm() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="firstName">First Name <span className="text-red-500">*</span></Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500" />
+                    <Input
+                      id="firstName"
+                      className={`pl-10 ${errors.firstName ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                      disabled={isLoading}
+                      {...register('firstName')}
+                      onChange={(e) => {
+                        register('firstName').onChange(e);
+                        updateProgress();
+                      }}
+                    />
+                  </div>
+                  {errors.firstName && (
+                    <p className="text-sm text-red-500">{errors.firstName.message}</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">Last Name <span className="text-red-500">*</span></Label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500" />
                     <Input
@@ -661,24 +681,4 @@ export function ProfileSetupForm() {
       </CardFooter>
     </Card>
   );
-}-4 w-4 text-neutral-500" />
-                    <Input
-                      id="firstName"
-                      className={`pl-10 ${errors.firstName ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
-                      disabled={isLoading}
-                      {...register('firstName')}
-                      onChange={(e) => {
-                        register('firstName').onChange(e);
-                        updateProgress();
-                      }}
-                    />
-                  </div>
-                  {errors.firstName && (
-                    <p className="text-sm text-red-500">{errors.firstName.message}</p>
-                  )}
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="lastName">Last Name <span className="text-red-500">*</span></Label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h
+}
