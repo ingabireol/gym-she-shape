@@ -45,7 +45,7 @@ const features = [
     id: 'blog',
     icon: <FileText className="h-10 w-10 text-primary" />,
     title: 'Wellness Content',
-    description: 'Informative articles, tips, and resources on fitness, nutrition, wellness, and women's health topics.',
+    description: 'Informative articles, tips, and resources on fitness, nutrition, wellness, and women\'s health topics.',
     image: '/images/features/blog.jpg',
   },
 ];

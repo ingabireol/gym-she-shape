@@ -15,7 +15,7 @@ const blogPosts = [
   {
     id: 1,
     title: '10 Effective Strength Training Exercises for Women',
-    excerpt: 'Discover the most effective strength training exercises designed specifically for women's physiology and fitness goals.',
+    excerpt: 'Discover the most effective strength training exercises designed specifically for women\'s physiology and fitness goals.',
     image: '/images/blog/strength-training.jpg',
     category: 'Fitness',
     author: 'Sarah Johnson',

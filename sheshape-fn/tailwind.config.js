@@ -1,5 +1,3 @@
-import { fontFamily } from "tailwindcss/defaultTheme";
-
 /** @type {import('tailwindcss').Config} */
 const config = {
   darkMode: ["class"],
@@ -111,11 +109,6 @@ const config = {
           foreground: "hsl(var(--card-foreground))",
         },
       },
-      fontFamily: {
-        sans: ["var(--font-inter)", ...fontFamily.sans],
-        serif: ["var(--font-playfair)", ...fontFamily.serif],
-        cursive: ["var(--font-dancing)", "cursive"],
-      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
@@ -138,6 +131,6 @@ const config = {
     },
   },
   plugins: [require("tailwindcss-animate")],
-};
+}
 
 export default config;

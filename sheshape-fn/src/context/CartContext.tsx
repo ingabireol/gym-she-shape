@@ -7,7 +7,7 @@ import {
   useEffect,
   ReactNode,
 } from 'react';
-import { Product } from '@/types/product';
+import { Product } from '@/types/models'; // Update to use models.ts
 import { toast } from 'react-toastify';
 
 export interface CartItem {

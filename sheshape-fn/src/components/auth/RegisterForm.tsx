@@ -54,7 +54,8 @@ export function RegisterForm() {
       email: '',
       password: '',
       confirmPassword: '',
-      termsAccepted: false,
+    //   termsAccepted: false,
+    // termsAccepted: false,
     },
   });
 

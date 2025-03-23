@@ -130,4 +130,7 @@
   .gradient-primary {
     @apply bg-gradient-to-r from-primary to-secondary;
   }
+  .section-padding {
+    @apply py-12 md:py-20;
+  }
 }

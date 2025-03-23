@@ -7,9 +7,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useCart } from '@/context/CartContext';
-import { ShoppingCart, Heart, HeartOff, Star } from 'lucide-react';
+import { ShoppingCart, Heart, Star } from 'lucide-react';
 import { formatPrice } from '@/lib/utils';
-import { Product } from '@/types/models';
+import { Product } from '@/types/models'; // Import from models.ts
 
 interface ProductCardProps {
   product: Product;

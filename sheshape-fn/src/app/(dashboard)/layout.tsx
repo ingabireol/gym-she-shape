@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { Sidebar } from '@/components/dashboard/Sidebar';
+import { Sidebar } from '@/components/dashboard/SideBar';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { ScrollToTop } from '@/components/common/ScrollToTop';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';

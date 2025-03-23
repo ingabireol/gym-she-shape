@@ -41,7 +41,7 @@ const trainers = [
     id: 3,
     name: 'Jessica Chen',
     role: 'Nutrition & Fitness Coach',
-    bio: 'Registered dietitian and certified personal trainer specializing in women's nutrition and sustainable fitness approaches.',
+    bio: 'Registered dietitian and certified personal trainer specializing in women\'s nutrition and sustainable fitness approaches.',
     image: '/images/trainers/trainer-3.jpg',
     specialties: ['Nutrition', 'Weight Management', 'Functional Training'],
     social: {
