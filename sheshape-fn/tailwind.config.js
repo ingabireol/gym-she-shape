@@ -109,6 +109,24 @@ const config = {
           foreground: "hsl(var(--card-foreground))",
         },
       },
+      fontFamily: {
+        sans: ['var(--font-inter)', 'sans-serif'],
+        serif: ['var(--font-playfair)', 'serif'],
+        cursive: ['var(--font-dancing-script)', 'cursive']
+      },
+      fontSize: {
+        // Increase the base size of all text
+        'base': '1rem',      // 16px (unchanged, but serves as our base)
+        'xs': '0.75rem',     // 12px
+        'sm': '0.875rem',    // 14px
+        'lg': '1.125rem',    // 18px
+        'xl': '1.25rem',     // 20px
+        '2xl': '1.5rem',     // 24px
+        '3xl': '1.875rem',   // 30px
+        '4xl': '2.5rem',     // 40px
+        '5xl': '3.5rem',     // 56px
+      },
+
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",

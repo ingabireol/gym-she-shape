@@ -1,42 +1,26 @@
-import { Header } from "@/components/common/Header";
-import { Footer } from "@/components/common/Footer";
-import { HeroSection } from "@/components/marketing/HeroSection";
-import { FeaturedPrograms } from "@/components/marketing/FeaturedPrograms";
-import { TrainersShowcase } from "@/components/marketing/TrainersShowcase";
-import { TestimonialsSection } from "@/components/marketing/TestimonialsSection";
-import { FeatureHighlights } from "@/components/marketing/FeatureHighlights";
+import { BlogPreview } from "@/components/marketing/BlogSection";
 import { CTASection } from "@/components/marketing/CTASection";
-import { BlogPreview } from "@/components/marketing/BlogPreview";
-import { ScrollToTop } from "@/components/common/ScrollToTop";
+import { FeaturedPrograms } from "@/components/marketing/FeaturedPrograms";
+import { FeatureHighlights } from "@/components/marketing/FeatureHighlights";
+import { HeroSection } from "@/components/marketing/HeroSection";
+import { TestimonialsSection } from "@/components/marketing/TestimonialsSection";
+import { TrainersShowcase } from "@/components/marketing/TrainersShowcase";
 
+// src/app/(marketing)/page.tsx
 export default function HomePage() {
   return (
     <>
-      <Header />
+      {/* Remove the Header component from here */}
       <main>
-        {/* Hero Section with motivational messaging and primary CTA */}
         <HeroSection />
-        
-        {/* Feature Highlights - what makes SheShape special */}
         <FeatureHighlights />
-        
-        {/* Featured Workout Programs */}
         <FeaturedPrograms />
-        
-        {/* Trainers Showcase */}
         <TrainersShowcase />
-        
-        {/* Testimonials and Success Stories */}
         <TestimonialsSection />
-        
-        {/* Blog Preview Section */}
         <BlogPreview />
-        
-        {/* Call-to-Action Section */}
         <CTASection />
       </main>
-      <Footer />
-      <ScrollToTop />
+      {/* Footer should also come from the layout */}
     </>
   );
 }
