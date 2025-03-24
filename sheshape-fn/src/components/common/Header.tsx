@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ShoppingCart, Menu, X, User, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -130,7 +130,9 @@ export function Header() {
                       className="rounded-full object-cover"
                     />
                   ) : (
-                    <User className='w-16 h-16' />
+                    <div className="h-10 w-10 rounded-full flex items-center justify-center">
+                      <User size={20} />
+                    </div>
                   )}
                 </Button>
               </DropdownMenuTrigger>
