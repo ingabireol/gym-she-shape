@@ -25,8 +25,8 @@ const registerSchema = z.object({
     .regex(/[A-Z]/, { message: 'Password must contain at least one uppercase letter' })
     .regex(/[0-9]/, { message: 'Password must contain at least one number' }),
   confirmPassword: z.string(),
-  termsAccepted: z.literal(true, {
-    errorMap: () => ({ message: 'You must accept the terms and conditions' }),
+  termsAccepted: z.boolean().refine(val => val === true, {
+    message: 'You must accept the terms and conditions',
   }),
 }).refine((data) => data.password === data.confirmPassword, {
   message: 'Passwords do not match',
@@ -47,6 +47,8 @@ export function RegisterForm() {
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
+    watch,
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -54,10 +56,12 @@ export function RegisterForm() {
       email: '',
       password: '',
       confirmPassword: '',
-    //   termsAccepted: false,
-    // termsAccepted: false,
+      termsAccepted: false,
     },
   });
+
+  // Watch the termsAccepted value to use in the checkbox
+  const termsAccepted = watch('termsAccepted');
 
   const onSubmit = async (data: RegisterFormValues) => {
     setError(null);
@@ -200,7 +204,12 @@ export function RegisterForm() {
             <Checkbox 
               id="terms" 
               className="mt-1"
-              {...register('termsAccepted')} 
+              checked={termsAccepted}
+              onCheckedChange={(checked) => {
+                setValue('termsAccepted', checked === true, { 
+                  shouldValidate: true 
+                });
+              }}
             />
             <Label htmlFor="terms" className="text-sm">
               I agree to the{' '}

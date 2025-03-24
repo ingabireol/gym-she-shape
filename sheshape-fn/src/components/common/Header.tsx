@@ -130,7 +130,7 @@ export function Header() {
                       className="rounded-full object-cover"
                     />
                   ) : (
-                    <User className="h-5 w-5" />
+                    <User className='w-16 h-16' />
                   )}
                 </Button>
               </DropdownMenuTrigger>
