@@ -9,6 +9,10 @@ import org.springframework.data.annotation.LastModifiedDate;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "products")
@@ -35,12 +39,16 @@ public class Product {
     
     @Column(name = "inventory_count", nullable = false)
     private Integer inventoryCount;
-    
-    @Column(name = "image_url")
-    private String imageUrl;
-    
-    @Column(nullable = false)
-    private String category;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("position ASC")
+    private List<ProductImage> images = new ArrayList<>();
+
+    @ElementCollection
+    @CollectionTable(name = "product_categories",
+            joinColumns = @JoinColumn(name = "product_id"))
+    @Column(name = "category")
+    private Set<String> categories = new HashSet<>();
     
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;

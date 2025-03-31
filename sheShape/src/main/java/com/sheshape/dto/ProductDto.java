@@ -10,6 +10,11 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Data
 @AllArgsConstructor
@@ -32,18 +37,18 @@ public class ProductDto {
     @NotNull(message = "Inventory count is required")
     @Min(value = 0, message = "Inventory count cannot be negative")
     private Integer inventoryCount;
-    
-    private String imageUrl;
-    
-    @NotBlank(message = "Category is required")
-    private String category;
+
+    private Set<String> categories = new HashSet<>();
+
+    // Instead of single imageUrl, use List of images
+    private List<ProductImageDto> images = new ArrayList<>();
     
     private Boolean isActive;
     
     private LocalDateTime createdAt;
     
     private LocalDateTime updatedAt;
-    
+
     // Constructor from Product entity
     public ProductDto(Product product) {
         this.id = product.getId();
@@ -52,10 +57,30 @@ public class ProductDto {
         this.price = product.getPrice();
         this.discountPrice = product.getDiscountPrice();
         this.inventoryCount = product.getInventoryCount();
-        this.imageUrl = product.getImageUrl();
-        this.category = product.getCategory();
         this.isActive = product.getIsActive();
         this.createdAt = product.getCreatedAt();
         this.updatedAt = product.getUpdatedAt();
+
+        // Convert categories
+        if (product.getCategories() != null) {
+            this.categories = new HashSet<>(product.getCategories());
+        }
+
+        // Convert images
+        if (product.getImages() != null && !product.getImages().isEmpty()) {
+            this.images = product.getImages().stream()
+                    .map(image -> {
+                        ProductImageDto imageDto = new ProductImageDto();
+                        imageDto.setId(image.getId());
+                        imageDto.setProductId(product.getId());
+                        imageDto.setImageUrl(image.getImageUrl());
+                        imageDto.setFileKey(image.getFileKey());
+                        imageDto.setMain(image.isMain());
+                        imageDto.setPosition(image.getPosition());
+                        imageDto.setCreatedAt(image.getCreatedAt());
+                        return imageDto;
+                    })
+                    .collect(Collectors.toList());
+        }
     }
 }
