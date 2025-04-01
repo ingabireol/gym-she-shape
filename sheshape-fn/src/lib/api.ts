@@ -2,7 +2,8 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 
 // Create axios instance with defaults
-export const api = axios.create({
+export const 
+api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080',
   headers: {
     'Content-Type': 'application/json',

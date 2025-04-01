@@ -3,19 +3,33 @@
 /**
  * Represents a product in the SheShape shop
  */
+// src/types/models.ts - Updated Product interface
 export interface Product {
-    id: number;
-    name: string;
-    description?: string;
-    price: number;
-    discountPrice?: number;
-    inventoryCount: number;
-    imageUrl?: string;
-    category: string;
-    isActive: boolean;
-    createdAt: string;
-    updatedAt: string;
-  }
+  id: number;
+  name: string;
+  description?: string;
+  price: number;
+  discountPrice?: number;
+  inventoryCount: number;
+  // Change from imageUrl to images array
+  images: ProductImage[];
+  // Change from category string to categories array
+  categories: string[];
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// New ProductImage interface
+export interface ProductImage {
+  id: number;
+  productId: number;
+  imageUrl: string;
+  fileKey: string;
+  isMain: boolean; // To indicate the primary/featured image
+  position: number; // For ordering images
+  createdAt: string;
+}
   
   /**
    * Represents a product category

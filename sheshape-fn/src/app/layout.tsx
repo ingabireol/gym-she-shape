@@ -32,7 +32,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.variable} ${playfair.variable} ${dancingScript.variable}`}>
+    <html lang="en" className={`${inter.variable} ${playfair.variable} ${dancingScript.variable}`}
+      suppressHydrationWarning
+    >
     <body>
       <Providers>{children}</Providers>
     </body>

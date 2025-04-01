@@ -26,6 +26,7 @@ export function formatDate(date: string | Date): string {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
+    timeZone: 'UTC'
   }).format(new Date(date));
 }
 
@@ -112,3 +113,4 @@ export function getInitials(name: string): string {
   
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
+
