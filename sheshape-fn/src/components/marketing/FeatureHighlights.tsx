@@ -1,157 +1,191 @@
 'use client';
 
-import { useState } from 'react';
-import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { CheckCircle, Users, Video, Heart, ShoppingBag, FileText } from 'lucide-react';
+import { 
+  Dumbbell, 
+  Utensils, 
+  Users, 
+  PlayCircle, 
+  ShoppingBag, 
+  FileText, 
+  Heart,
+  Zap,
+  Target,
+  Award
+} from 'lucide-react';
 
 const features = [
   {
-    id: 'personalized',
-    icon: <CheckCircle className="h-10 w-10 text-primary" />,
-    title: 'Personalized Programs',
-    description: 'Customized workout programs designed specifically for women, adapting to your fitness level, goals, and preferences.',
-    image: '/images/features/personalized.jpg',
+    icon: Dumbbell,
+    title: 'Personalized Workouts',
+    description: 'AI-powered workout plans tailored to your fitness level, goals, and preferences.',
+    color: 'from-primary to-primary/80',
+    bgColor: 'bg-primary/10',
   },
   {
-    id: 'community',
-    icon: <Users className="h-10 w-10 text-primary" />,
-    title: 'Supportive Community',
-    description: 'Join thousands of women on similar journeys, sharing experiences and motivating each other through our inclusive community.',
-    image: '/images/features/community.jpg',
-  },
-  {
-    id: 'video',
-    icon: <Video className="h-10 w-10 text-primary" />,
-    title: 'Video Workouts',
-    description: 'Access high-quality workout videos with detailed instructions to ensure proper form and maximize results.',
-    image: '/images/features/video.jpg',
-  },
-  {
-    id: 'nutrition',
-    icon: <Heart className="h-10 w-10 text-primary" />,
+    icon: Utensils,
     title: 'Nutrition Guidance',
-    description: 'Expert nutrition plans and meal suggestions to complement your fitness routine and boost your overall health.',
-    image: '/images/features/nutrition.jpg',
+    description: 'Expert-designed meal plans and nutrition advice to fuel your fitness journey.',
+    color: 'from-secondary to-secondary/80',
+    bgColor: 'bg-secondary/10',
   },
   {
-    id: 'shop',
-    icon: <ShoppingBag className="h-10 w-10 text-primary" />,
-    title: 'Fitness Shop',
-    description: 'Quality fitness equipment, supplements, and workout gear to enhance your fitness journey from our curated shop.',
-    image: '/images/features/shop.jpg',
+    icon: Users,
+    title: 'Supportive Community',
+    description: 'Connect with like-minded women, share progress, and motivate each other.',
+    color: 'from-accent1 to-accent1/80',
+    bgColor: 'bg-accent1/10',
   },
   {
-    id: 'blog',
-    icon: <FileText className="h-10 w-10 text-primary" />,
-    title: 'Wellness Content',
-    description: 'Informative articles, tips, and resources on fitness, nutrition, wellness, and women\'s health topics.',
-    image: '/images/features/blog.jpg',
+    icon: PlayCircle,
+    title: 'HD Video Workouts',
+    description: 'High-quality workout videos with professional trainers guiding every move.',
+    color: 'from-accent2 to-accent2/80',
+    bgColor: 'bg-accent2/10',
+  },
+  {
+    icon: Target,
+    title: 'Goal Tracking',
+    description: 'Monitor your progress with detailed analytics and achievement milestones.',
+    color: 'from-primary to-secondary',
+    bgColor: 'bg-gradient-to-r from-primary/10 to-secondary/10',
+  },
+  {
+    icon: Heart,
+    title: 'Wellness Focus',
+    description: 'Holistic approach to health including mental wellness and self-care.',
+    color: 'from-accent1 to-accent2',
+    bgColor: 'bg-gradient-to-r from-accent1/10 to-accent2/10',
   },
 ];
 
-// Animation variants
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.5,
-    },
-  },
-};
+const stats = [
+  { number: '50K+', label: 'Active Members', icon: Users },
+  { number: '200+', label: 'Workout Programs', icon: Dumbbell },
+  { number: '95%', label: 'Success Rate', icon: Award },
+  { number: '24/7', label: 'Support Available', icon: Zap },
+];
 
 export function FeatureHighlights() {
-  const [activeFeature, setActiveFeature] = useState('personalized');
-
   return (
-    <section className="py-16 md:py-24 bg-white">
-      <div className="container-custom">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Why Choose SheShape</h2>
-          <p className="text-neutral-600 max-w-3xl mx-auto">
-            SheShape offers a comprehensive fitness experience designed specifically for women,
-            with everything you need to achieve your health and wellness goals.
+    <section className="py-20 bg-white">
+      <div className="container-custom mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Section Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-16"
+        >
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-neutral-900 mb-6">
+            Everything You Need to{' '}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">
+              Succeed
+            </span>
+          </h2>
+          <p className="text-lg text-neutral-600 max-w-3xl mx-auto">
+            SheShape provides all the tools, guidance, and support you need for a successful 
+            fitness transformation. Join thousands of women who have already achieved their goals.
           </p>
-        </div>
+        </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
-          {/* Features illustration */}
-          <div className="order-2 lg:order-1 relative">
-            <div className="relative rounded-xl overflow-hidden aspect-[4/3] shadow-xl">
-              {features.map((feature) => (
-                <div
-                  key={feature.id}
-                  className={`absolute inset-0 transition-opacity duration-500 ease-in-out ${
-                    activeFeature === feature.id ? 'opacity-100' : 'opacity-0'
-                  }`}
-                >
-                  <Image
-                    src={feature.image}
-                    alt={feature.title}
-                    fill
-                    className="object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                    <h3 className="text-xl font-bold">{feature.title}</h3>
-                    <p className="text-white/80 mt-2">{feature.description}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-            
-            {/* Decorative elements */}
-            <div className="absolute -bottom-6 -left-6 h-12 w-12 rounded-lg bg-accent1/20 -z-10"></div>
-            <div className="absolute -top-6 -right-6 h-12 w-12 rounded-lg bg-primary/20 -z-10"></div>
-          </div>
-
-          {/* Features list */}
-          <div className="order-1 lg:order-2">
+        {/* Stats Grid */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="grid grid-cols-2 lg:grid-cols-4 gap-8 mb-20"
+        >
+          {stats.map((stat, index) => (
             <motion.div
-              className="space-y-6"
-              variants={containerVariants}
-              initial="hidden"
-              whileInView="visible"
+              key={stat.label}
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              className="text-center"
             >
-              {features.map((feature) => (
-                <motion.div
-                  key={feature.id}
-                  variants={itemVariants}
-                  className={`p-5 rounded-lg cursor-pointer transition-all duration-300 ${
-                    activeFeature === feature.id
-                      ? 'bg-primary/10 border-l-4 border-primary shadow-sm'
-                      : 'hover:bg-neutral-50 border-l-4 border-transparent'
-                  }`}
-                  onClick={() => setActiveFeature(feature.id)}
-                  onMouseEnter={() => setActiveFeature(feature.id)}
-                >
-                  <div className="flex items-start">
-                    <div className="flex-shrink-0 mr-4">
-                      {feature.icon}
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
-                      <p className="text-neutral-600">{feature.description}</p>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
+              <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center">
+                <stat.icon className="h-8 w-8 text-white" />
+              </div>
+              <div className="text-3xl md:text-4xl font-bold text-neutral-900 mb-2">
+                {stat.number}
+              </div>
+              <div className="text-neutral-600">
+                {stat.label}
+              </div>
             </motion.div>
-          </div>
+          ))}
+        </motion.div>
+
+        {/* Features Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {features.map((feature, index) => (
+            <motion.div
+              key={feature.title}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: index * 0.1 }}
+              className="group"
+            >
+              <div className="relative bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-neutral-100">
+                {/* Background Gradient */}
+                <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl bg-gradient-to-br ${feature.color}`}></div>
+                
+                {/* Content */}
+                <div className="relative z-10">
+                  {/* Icon */}
+                  <div className={`w-16 h-16 rounded-2xl ${feature.bgColor} flex items-center justify-center mb-6 group-hover:bg-white/20 transition-colors duration-300`}>
+                    <feature.icon className={`h-8 w-8 bg-gradient-to-r ${feature.color} bg-clip-text text-transparent group-hover:text-white transition-colors duration-300`} />
+                  </div>
+                  
+                  {/* Title */}
+                  <h3 className="text-xl font-bold text-neutral-900 mb-4 group-hover:text-white transition-colors duration-300">
+                    {feature.title}
+                  </h3>
+                  
+                  {/* Description */}
+                  <p className="text-neutral-600 group-hover:text-white/90 transition-colors duration-300">
+                    {feature.description}
+                  </p>
+                </div>
+
+                {/* Hover Effect Overlay */}
+                <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-10 transition-opacity duration-300 bg-gradient-to-br from-white to-transparent"></div>
+              </div>
+            </motion.div>
+          ))}
         </div>
+
+        {/* Bottom CTA */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          className="text-center mt-16"
+        >
+          <div className="bg-gradient-to-r from-primary/5 to-secondary/5 rounded-2xl p-8 md:p-12">
+            <h3 className="text-2xl md:text-3xl font-bold text-neutral-900 mb-4">
+              Ready to Transform Your Life?
+            </h3>
+            <p className="text-neutral-600 mb-8 max-w-2xl mx-auto">
+              Join the SheShape community today and start your journey towards a healthier, 
+              stronger, and more confident you.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button className="bg-gradient-to-r from-primary to-secondary text-white px-8 py-4 rounded-lg font-semibold hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                Start Free Trial
+              </button>
+              <button className="border-2 border-primary text-primary px-8 py-4 rounded-lg font-semibold hover:bg-primary hover:text-white transition-all duration-300">
+                Learn More
+              </button>
+            </div>
+          </div>
+        </motion.div>
       </div>
     </section>
   );

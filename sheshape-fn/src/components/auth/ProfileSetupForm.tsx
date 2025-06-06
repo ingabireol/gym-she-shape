@@ -66,7 +66,7 @@ export function ProfileSetupForm() {
   const [setupProgress, setSetupProgress] = useState(0);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { user, updateUser } = useAuth();
+  const { user, updateProfile } = useAuth();
   const router = useRouter();
 
   const {
@@ -205,19 +205,12 @@ export function ProfileSetupForm() {
         profileImage: profileImage || undefined,
       };
       
-      // In a real app, this would make an API call to update the profile
-      // and upload the profile image if changed
+      // Update the profile - this will trigger redirect in AuthContext
+      await updateProfile(formattedData);
       
-      // For demo purposes, simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Show success message briefly before redirect
+      setSuccessMessage("Your profile has been successfully set up! Redirecting to your dashboard...");
       
-      // Show success message
-      setSuccessMessage("Your profile has been successfully set up! You'll be redirected to your dashboard in a moment.");
-      
-      // Redirect to dashboard after successful setup
-      setTimeout(() => {
-        router.push('/dashboard');
-      }, 3000);
     } catch (err: any) {
       console.error('Profile setup error:', err);
       setError(err.response?.data?.message || 'Profile setup failed. Please try again.');

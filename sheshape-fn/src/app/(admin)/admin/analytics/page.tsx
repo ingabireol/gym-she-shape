@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AdminMetricCard } from '@/components/admin/AdminMetricCard';
 import { Button } from '@/components/ui/button';
-import { Calendar, Download, Users, DollarSign, ShoppingBag, TrendingUp } from 'lucide-react';
+import { Download, Users, DollarSign, ShoppingBag, TrendingUp } from 'lucide-react';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { RevenueChart } from '@/components/admin/analytics/RevenueChart';
 import { UserAcquisitionChart } from '@/components/admin/analytics/UserAcquisitionChart';

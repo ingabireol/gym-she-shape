@@ -97,6 +97,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Helper function to determine redirect path based on user state
+  const getRedirectPath = (userData: User) => {
+    // Admin users always go to admin dashboard
+    if (userData.role === 'ADMIN') {
+      return '/admin';
+    }
+
+    // Check if profile is complete (has firstName and lastName)
+    const hasCompleteProfile = userData.profile?.firstName && userData.profile?.lastName;
+
+    if (!hasCompleteProfile) {
+      // First time user or incomplete profile -> profile setup
+      return '/profile-setup';
+    } else {
+      // Returning user with complete profile -> dashboard
+      return '/dashboard';
+    }
+  };
+
   // Login function
   const login = async (email: string, password: string) => {
     try {
@@ -110,18 +129,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       api.defaults.headers.common['Authorization'] = `Bearer ${response.token}`;
       
       // Fetch user data
-      await fetchCurrentUser();
+      const userData = await authService.getCurrentUser();
+      setUser(userData);
       
       toast.success('Successfully logged in');
       
-      // Redirect based on profile status
-      if (user?.profile?.firstName) {
-        // Profile is set up, go to dashboard
-        router.push('/dashboard');
-      } else {
-        // New user or incomplete profile, go to profile setup
-        router.push('/profile-setup');
-      }
+      // Determine redirect path based on user role and profile status
+      const redirectPath = getRedirectPath(userData);
+      router.push(redirectPath);
+      
     } catch (error) {
       console.error('Login failed:', error);
       toast.error('Login failed. Please check your credentials.');
@@ -183,6 +199,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const response = await authService.updateProfile(user.id, profileData);
       setUser(response);
       toast.success('Profile updated successfully');
+      
+      // After successful profile update, check if we should redirect
+      // This is especially important for first-time profile setup
+      const redirectPath = getRedirectPath(response);
+      
+      // Only redirect if we're currently on the profile setup page
+      if (window.location.pathname === '/profile-setup') {
+        router.push(redirectPath);
+      }
+      
     } catch (error) {
       console.error('Failed to update profile:', error);
       toast.error('Failed to update profile');
