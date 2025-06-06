@@ -18,13 +18,11 @@ import {
   Dumbbell,
   Utensils,
   TrendingUp,
-  Calendar,
   Award,
   Target,
   Clock,
   PlayCircle,
   ArrowRight,
-  Star,
   Heart
 } from 'lucide-react';
 
