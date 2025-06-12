@@ -61,7 +61,7 @@ public interface ProductImageService {
     
     /**
      * Update the positions of multiple product images
-     * @param imagePositions Map of image IDs to their new positions
+     * @param updatedImages Map of image IDs to their new positions
      */
     void updateImagePositions(List<ProductImage> updatedImages);
     
