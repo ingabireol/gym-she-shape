@@ -24,4 +24,5 @@ public interface UserService {
     List<UserDto> getPublicTrainers();
     
     List<UserDto> getPublicNutritionists();
+    Long getUserIdByUsernameOrEmail(String username);
 }

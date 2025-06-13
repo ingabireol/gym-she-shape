@@ -1,5 +1,6 @@
 package com.sheshape.model;
 
+import com.sheshape.model.profile.Profile;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -35,6 +36,9 @@ public class User {
     
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
+
+    @Column(name = "profile_completed")
+    private Boolean profileCompleted = false;
     
     @CreatedDate
     @Column(name = "created_at", updatable = false)

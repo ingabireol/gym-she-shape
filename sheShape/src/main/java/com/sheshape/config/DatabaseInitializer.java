@@ -1,10 +1,10 @@
 package com.sheshape.config;
 
 import com.sheshape.model.Authority;
-import com.sheshape.model.Profile;
+import com.sheshape.model.profile.Profile;
 import com.sheshape.model.User;
 import com.sheshape.repository.AuthorityRepository;
-import com.sheshape.repository.ProfileRepository;
+import com.sheshape.repository.profile.ProfileRepository;
 import com.sheshape.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.boot.CommandLineRunner;
@@ -117,7 +117,7 @@ public class DatabaseInitializer implements CommandLineRunner {
         profile.setUser(savedUser);
         profile.setFirstName("Sarah");
         profile.setLastName("Johnson");
-        profile.setBio("Certified fitness trainer with 5+ years of experience in strength training and HIIT workouts.");
+//        profile.setBio("Certified fitness trainer with 5+ years of experience in strength training and HIIT workouts.");
         profileRepository.save(profile);
     }
 
@@ -140,7 +140,7 @@ public class DatabaseInitializer implements CommandLineRunner {
         profile.setUser(savedUser);
         profile.setFirstName("Michael");
         profile.setLastName("Chen");
-        profile.setBio("Registered dietitian specializing in weight management and sports nutrition plans.");
+//        profile.setBio("Registered dietitian specializing in weight management and sports nutrition plans.");
         profileRepository.save(profile);
     }
 }

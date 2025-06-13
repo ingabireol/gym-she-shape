@@ -116,4 +116,9 @@ public class UserServiceImpl implements UserService {
                 .map(UserDto::new)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public Long getUserIdByUsernameOrEmail(String username) {
+        return userRepository.findByUsernameOrEmail(username,username).map(User::getId).orElse(null);
+    }
 }
