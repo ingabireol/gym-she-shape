@@ -258,11 +258,15 @@ public class ProfileService {
         fitness.setUserId(userId);
         fitness.setFitnessLevel(request.getFitnessLevel());
         fitness.setPrimaryGoal(request.getPrimaryGoal());
-        fitness.setFitnessGoals(request.getFitnessGoals());
-        fitness.setPreferredActivities(request.getPreferredActivities());
-        fitness.setWorkoutFrequencyPerWeek(request.getWorkoutFrequencyPerWeek());
-        fitness.setPreferredWorkoutDurationMinutes(request.getPreferredWorkoutDurationMinutes());
+
+        // Handle new field names and types
+        fitness.setSecondaryGoals(request.getSecondaryGoals());
+        fitness.setPreferredActivityTypes(request.getPreferredActivityTypes());
+        fitness.setWorkoutFrequency(request.getWorkoutFrequency());
+        fitness.setWorkoutDuration(request.getWorkoutDuration());
+        fitness.setPreferredWorkoutDays(request.getPreferredWorkoutDays());
         fitness.setPreferredWorkoutTimes(request.getPreferredWorkoutTimes());
+
         return fitness;
     }
 
@@ -273,10 +277,13 @@ public class ProfileService {
         fitness.setUserId(userId);
         if (request.getFitnessLevel() != null) fitness.setFitnessLevel(request.getFitnessLevel());
         if (request.getPrimaryGoal() != null) fitness.setPrimaryGoal(request.getPrimaryGoal());
-        if (request.getFitnessGoals() != null) fitness.setFitnessGoals(request.getFitnessGoals());
-        if (request.getPreferredActivities() != null) fitness.setPreferredActivities(request.getPreferredActivities());
-        if (request.getWorkoutFrequencyPerWeek() != null) fitness.setWorkoutFrequencyPerWeek(request.getWorkoutFrequencyPerWeek());
-        if (request.getPreferredWorkoutDurationMinutes() != null) fitness.setPreferredWorkoutDurationMinutes(request.getPreferredWorkoutDurationMinutes());
+
+        // Handle new field names and types
+        if (request.getSecondaryGoals() != null) fitness.setSecondaryGoals(request.getSecondaryGoals());
+        if (request.getPreferredActivityTypes() != null) fitness.setPreferredActivityTypes(request.getPreferredActivityTypes());
+        if (request.getWorkoutFrequency() != null) fitness.setWorkoutFrequency(request.getWorkoutFrequency());
+        if (request.getWorkoutDuration() != null) fitness.setWorkoutDuration(request.getWorkoutDuration());
+        if (request.getPreferredWorkoutDays() != null) fitness.setPreferredWorkoutDays(request.getPreferredWorkoutDays());
         if (request.getPreferredWorkoutTimes() != null) fitness.setPreferredWorkoutTimes(request.getPreferredWorkoutTimes());
 
         return fitnessProfileRepository.save(fitness);
@@ -290,19 +297,23 @@ public class ProfileService {
 
         HealthInformation health = new HealthInformation();
         health.setUserId(userId);
+
+        // Handle list types
         health.setDietaryRestrictions(request.getDietaryRestrictions());
         health.setHealthConditions(request.getHealthConditions());
         health.setMedications(request.getMedications());
         health.setEmergencyContactName(request.getEmergencyContactName());
         health.setEmergencyContactPhone(request.getEmergencyContactPhone());
+
         return health;
     }
-
     private HealthInformation updateHealthInformation(Long userId, ProfileUpdateRequestDTO request) {
         HealthInformation health = healthInformationRepository.findByUserId(userId)
                 .orElse(new HealthInformation());
 
         health.setUserId(userId);
+
+        // Handle list types
         if (request.getDietaryRestrictions() != null) health.setDietaryRestrictions(request.getDietaryRestrictions());
         if (request.getHealthConditions() != null) health.setHealthConditions(request.getHealthConditions());
         if (request.getMedications() != null) health.setMedications(request.getMedications());
@@ -311,7 +322,6 @@ public class ProfileService {
 
         return healthInformationRepository.save(health);
     }
-
     private UserPreferences createUserPreferences(Long userId, ProfileSetupRequestDTO request) {
         UserPreferences preferences = new UserPreferences();
         preferences.setUserId(userId);
@@ -337,30 +347,26 @@ public class ProfileService {
         return userPreferencesRepository.save(preferences);
     }
 
-    private ProfileResponseDTO buildProfileResponse(User user, Profile profile, PhysicalAttributes physicalAttributes,
-                                                    FitnessProfile fitnessProfile, HealthInformation healthInformation,
+    private ProfileResponseDTO buildProfileResponse(User user, Profile profile,
+                                                    PhysicalAttributes physicalAttributes,
+                                                    FitnessProfile fitnessProfile,
+                                                    HealthInformation healthInformation,
                                                     UserPreferences userPreferences) {
 
         ProfileResponseDTO.ProfileResponseDTOBuilder builder = ProfileResponseDTO.builder()
-                .userId(user.getId())
-                .username(user.getUsername())
-                .email(user.getEmail())
-                .role(user.getRole())
-                .isActive(user.getIsActive())
-                .profileCompleted(user.getProfileCompleted())
-                .userCreatedAt(user.getCreatedAt())
-                .userUpdatedAt(user.getUpdatedAt());
+                .profileCompleted(user.getProfileCompleted());
 
         // Basic Profile Information
         if (profile != null) {
-            builder.firstName(profile.getFirstName())
+            builder.id(profile.getId())
+                    .firstName(profile.getFirstName())
                     .lastName(profile.getLastName())
                     .dateOfBirth(profile.getDateOfBirth())
                     .gender(profile.getGender())
                     .phoneNumber(profile.getPhoneNumber())
                     .profilePictureUrl(profile.getProfilePictureUrl())
-                    .profileCreatedAt(profile.getCreatedAt())
-                    .profileUpdatedAt(profile.getUpdatedAt());
+                    .createdAt(profile.getCreatedAt())
+                    .updatedAt(profile.getUpdatedAt());
         }
 
         // Physical Attributes
@@ -374,10 +380,11 @@ public class ProfileService {
         if (fitnessProfile != null) {
             builder.fitnessLevel(fitnessProfile.getFitnessLevel())
                     .primaryGoal(fitnessProfile.getPrimaryGoal())
-                    .fitnessGoals(fitnessProfile.getFitnessGoals())
-                    .preferredActivities(fitnessProfile.getPreferredActivities())
-                    .workoutFrequencyPerWeek(fitnessProfile.getWorkoutFrequencyPerWeek())
-                    .preferredWorkoutDurationMinutes(fitnessProfile.getPreferredWorkoutDurationMinutes())
+                    .secondaryGoals(fitnessProfile.getSecondaryGoals())
+                    .preferredActivityTypes(fitnessProfile.getPreferredActivityTypes())
+                    .workoutFrequency(fitnessProfile.getWorkoutFrequency())
+                    .workoutDuration(fitnessProfile.getWorkoutDuration())
+                    .preferredWorkoutDays(fitnessProfile.getPreferredWorkoutDays())
                     .preferredWorkoutTimes(fitnessProfile.getPreferredWorkoutTimes());
         }
 

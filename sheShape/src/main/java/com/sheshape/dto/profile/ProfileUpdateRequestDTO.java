@@ -13,7 +13,7 @@ import java.util.List;
 
 @Data
 public class ProfileUpdateRequestDTO {
-    
+
     // Basic Profile Information
     @Size(max = 50, message = "First name must not exceed 50 characters")
     private String firstName;
@@ -45,32 +45,40 @@ public class ProfileUpdateRequestDTO {
     // Fitness Information
     private FitnessLevel fitnessLevel;
     private FitnessGoal primaryGoal;
-    
-    @Size(max = 5, message = "You can select up to 5 fitness goals")
-    private List<FitnessGoal> fitnessGoals;
-    
-    @Size(max = 5, message = "You can select up to 5 preferred activities")
-    private List<ActivityType> preferredActivities;
 
+    // Updated to match frontend field names
+    @Size(max = 5, message = "You can select up to 5 secondary goals")
+    private List<String> secondaryGoals;
+
+    // Updated to match frontend field names and use String list instead of enum
+    @Size(max = 10, message = "You can select up to 10 preferred activities")
+    private List<String> preferredActivityTypes;
+
+    // Updated field name to match frontend
     @Min(value = 1, message = "Workout frequency must be at least 1 per week")
     @Max(value = 7, message = "Workout frequency cannot exceed 7 per week")
-    private Integer workoutFrequencyPerWeek;
+    private Integer workoutFrequency;
 
+    // Updated field name to match frontend
     @Min(value = 15, message = "Workout duration must be at least 15 minutes")
     @Max(value = 180, message = "Workout duration cannot exceed 180 minutes")
-    private Integer preferredWorkoutDurationMinutes;
+    private Integer workoutDuration;
 
-    private String preferredWorkoutTimes;
+    // Updated to List to match frontend
+    private List<String> preferredWorkoutDays;
 
-    // Health Information
-    @Size(max = 1000, message = "Dietary restrictions must not exceed 1000 characters")
-    private String dietaryRestrictions;
+    // Updated to List to match frontend
+    private List<String> preferredWorkoutTimes;
 
-    @Size(max = 1000, message = "Health conditions must not exceed 1000 characters")
-    private String healthConditions;
+    // Health Information - Updated to List to match frontend
+    @Size(max = 20, message = "You can select up to 20 dietary restrictions")
+    private List<String> dietaryRestrictions;
 
-    @Size(max = 500, message = "Medications must not exceed 500 characters")
-    private String medications;
+    @Size(max = 20, message = "You can select up to 20 health conditions")
+    private List<String> healthConditions;
+
+    @Size(max = 50, message = "You can list up to 50 medications")
+    private List<String> medications;
 
     @Size(max = 100, message = "Emergency contact name must not exceed 100 characters")
     private String emergencyContactName;
@@ -80,7 +88,7 @@ public class ProfileUpdateRequestDTO {
 
     // Preferences
     private String timezone;
-    
+
     @Pattern(regexp = "^[a-z]{2}$", message = "Language must be a valid 2-letter language code")
     private String language;
 

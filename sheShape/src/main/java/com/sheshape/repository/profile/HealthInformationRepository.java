@@ -18,10 +18,10 @@ public interface HealthInformationRepository extends JpaRepository<HealthInforma
     
     void deleteByUserId(Long userId);
     
-    @Query("SELECT hi FROM HealthInformation hi WHERE hi.dietaryRestrictions IS NOT NULL AND hi.dietaryRestrictions != ''")
+    @Query("SELECT hi FROM HealthInformation hi WHERE hi.dietaryRestrictionsRaw IS NOT NULL AND hi.dietaryRestrictionsRaw != ''")
     List<HealthInformation> findUsersWithDietaryRestrictions();
     
-    @Query("SELECT hi FROM HealthInformation hi WHERE hi.healthConditions IS NOT NULL AND hi.healthConditions != ''")
+    @Query("SELECT hi FROM HealthInformation hi WHERE hi.healthConditionsRaw IS NOT NULL AND hi.healthConditionsRaw != ''")
     List<HealthInformation> findUsersWithHealthConditions();
     
     @Query("SELECT hi FROM HealthInformation hi WHERE hi.emergencyContactName IS NOT NULL")

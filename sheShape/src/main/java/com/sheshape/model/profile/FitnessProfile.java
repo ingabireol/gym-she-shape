@@ -31,26 +31,28 @@ public class FitnessProfile {
     @Column(name = "primary_goal")
     private FitnessGoal primaryGoal;
 
-    @ElementCollection(targetClass = FitnessGoal.class)
-    @Enumerated(EnumType.STRING)
-    @CollectionTable(name = "user_fitness_goals", joinColumns = @JoinColumn(name = "fitness_profile_id"))
-    @Column(name = "fitness_goal")
-    private List<FitnessGoal> fitnessGoals;
+    // Store secondary goals as comma-separated values to match frontend
+    @Column(name = "secondary_goals", length = 500)
+    private String secondaryGoalsRaw;
 
-    @ElementCollection(targetClass = ActivityType.class)
-    @Enumerated(EnumType.STRING)
-    @CollectionTable(name = "user_preferred_activities", joinColumns = @JoinColumn(name = "fitness_profile_id"))
-    @Column(name = "activity_type")
-    private List<ActivityType> preferredActivities;
+    // Store preferred activity types as comma-separated values to match frontend
+    @Column(name = "preferred_activity_types", length = 500)
+    private String preferredActivityTypesRaw;
 
-    @Column(name = "workout_frequency_per_week")
-    private Integer workoutFrequencyPerWeek;
+    // Updated field names to match frontend
+    @Column(name = "workout_frequency")
+    private Integer workoutFrequency;
 
-    @Column(name = "preferred_workout_duration_minutes")
-    private Integer preferredWorkoutDurationMinutes;
+    @Column(name = "workout_duration")
+    private Integer workoutDuration;
 
-    @Column(name = "preferred_workout_times")
-    private String preferredWorkoutTimes;
+    // Store workout days as comma-separated values
+    @Column(name = "preferred_workout_days", length = 200)
+    private String preferredWorkoutDaysRaw;
+
+    // Store workout times as comma-separated values
+    @Column(name = "preferred_workout_times", length = 500)
+    private String preferredWorkoutTimesRaw;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -60,17 +62,119 @@ public class FitnessProfile {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    // Helper methods to convert between List and String storage
+    @Transient
+    public List<String> getSecondaryGoals() {
+        if (secondaryGoalsRaw == null || secondaryGoalsRaw.trim().isEmpty()) {
+            return List.of();
+        }
+        return List.of(secondaryGoalsRaw.split(","));
+    }
+
+    public void setSecondaryGoals(List<String> secondaryGoals) {
+        if (secondaryGoals == null || secondaryGoals.isEmpty()) {
+            this.secondaryGoalsRaw = null;
+        } else {
+            this.secondaryGoalsRaw = String.join(",", secondaryGoals);
+        }
+    }
+
+    @Transient
+    public List<String> getPreferredActivityTypes() {
+        if (preferredActivityTypesRaw == null || preferredActivityTypesRaw.trim().isEmpty()) {
+            return List.of();
+        }
+        return List.of(preferredActivityTypesRaw.split(","));
+    }
+
+    public void setPreferredActivityTypes(List<String> preferredActivityTypes) {
+        if (preferredActivityTypes == null || preferredActivityTypes.isEmpty()) {
+            this.preferredActivityTypesRaw = null;
+        } else {
+            this.preferredActivityTypesRaw = String.join(",", preferredActivityTypes);
+        }
+    }
+
+    @Transient
+    public List<String> getPreferredWorkoutDays() {
+        if (preferredWorkoutDaysRaw == null || preferredWorkoutDaysRaw.trim().isEmpty()) {
+            return List.of();
+        }
+        return List.of(preferredWorkoutDaysRaw.split(","));
+    }
+
+    public void setPreferredWorkoutDays(List<String> preferredWorkoutDays) {
+        if (preferredWorkoutDays == null || preferredWorkoutDays.isEmpty()) {
+            this.preferredWorkoutDaysRaw = null;
+        } else {
+            this.preferredWorkoutDaysRaw = String.join(",", preferredWorkoutDays);
+        }
+    }
+
+    @Transient
+    public List<String> getPreferredWorkoutTimes() {
+        if (preferredWorkoutTimesRaw == null || preferredWorkoutTimesRaw.trim().isEmpty()) {
+            return List.of();
+        }
+        return List.of(preferredWorkoutTimesRaw.split(","));
+    }
+
+    public void setPreferredWorkoutTimes(List<String> preferredWorkoutTimes) {
+        if (preferredWorkoutTimes == null || preferredWorkoutTimes.isEmpty()) {
+            this.preferredWorkoutTimesRaw = null;
+        } else {
+            this.preferredWorkoutTimesRaw = String.join(",", preferredWorkoutTimes);
+        }
+    }
+
+    // Keep legacy methods for backward compatibility
+    @Deprecated
+    @Transient
+    public List<FitnessGoal> getFitnessGoals() {
+        // This can be mapped from secondaryGoals if needed
+        return List.of();
+    }
+
+    @Deprecated
+    @Transient
+    public List<ActivityType> getPreferredActivities() {
+        // This can be mapped from preferredActivityTypes if needed
+        return List.of();
+    }
+
+    @Deprecated
+    @Transient
+    public Integer getWorkoutFrequencyPerWeek() {
+        return workoutFrequency;
+    }
+
+    @Deprecated
+    public void setWorkoutFrequencyPerWeek(Integer workoutFrequencyPerWeek) {
+        this.workoutFrequency = workoutFrequencyPerWeek;
+    }
+
+    @Deprecated
+    @Transient
+    public Integer getPreferredWorkoutDurationMinutes() {
+        return workoutDuration;
+    }
+
+    @Deprecated
+    public void setPreferredWorkoutDurationMinutes(Integer preferredWorkoutDurationMinutes) {
+        this.workoutDuration = preferredWorkoutDurationMinutes;
+    }
+
     public enum FitnessLevel {
         BEGINNER, INTERMEDIATE, ADVANCED, EXPERT
     }
 
     public enum FitnessGoal {
-        WEIGHT_LOSS, MUSCLE_GAIN, STRENGTH_BUILDING, ENDURANCE, 
+        WEIGHT_LOSS, MUSCLE_GAIN, STRENGTH_BUILDING, ENDURANCE,
         FLEXIBILITY, GENERAL_FITNESS, STRESS_RELIEF, REHABILITATION
     }
 
     public enum ActivityType {
-        CARDIO, STRENGTH_TRAINING, YOGA, PILATES, HIIT, 
-        DANCE, SWIMMING, RUNNING, CYCLING, WALKING
+        CARDIO, STRENGTH_TRAINING, YOGA, PILATES, HIIT,
+        DANCING, OUTDOOR, SWIMMING, RUNNING, CYCLING, WALKING
     }
 }
