@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { ProfileSetupForm } from '@/components/auth/ProfileSetupForm';
+import  ProfileSetupForm  from '@/components/auth/ProfileSetupForm';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { CartDrawer } from '@/components/shop/CartDrawer';
 

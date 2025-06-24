@@ -1,158 +1,142 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+import { z } from 'zod';
 import { useAuth } from '@/context/AuthContext';
+import { ProfileSetupRequest } from '@/services/profileService';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { 
-  User, 
-  Phone, 
-  Upload, 
-  AlertTriangle, 
-  Calendar, 
-  MapPin, 
-  Weight, 
-  Ruler, 
-  Activity,
-  ArrowLeft,
-  ArrowRight,
-  CheckCircle
-} from 'lucide-react';
-import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Progress } from '@/components/ui/progress';
+import { AlertCircle, Upload, User, Activity, Settings, ArrowLeft, ArrowRight, Check } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
-// Form schema using zod
+// Validation schema for profile setup
 const profileSetupSchema = z.object({
-  // Personal Information
-  firstName: z.string().min(1, { message: 'First name is required' }),
-  lastName: z.string().min(1, { message: 'Last name is required' }),
-  phoneNumber: z.string().optional(),
-  bio: z.string().max(500, { message: 'Bio cannot exceed 500 characters' }).optional(),
-  
-  // Fitness Information
-  age: z.string().optional().transform(val => val === '' ? undefined : Number(val)),
-  height: z.string().optional().transform(val => val === '' ? undefined : Number(val)),
-  weight: z.string().optional().transform(val => val === '' ? undefined : Number(val)),
-  activityLevel: z.enum(['sedentary', 'light', 'moderate', 'active', 'very_active']).optional(),
-  fitnessGoal: z.enum(['weight_loss', 'muscle_gain', 'maintenance', 'overall_health', 'flexibility']).optional(),
-  location: z.string().optional(),
-  
-  // Preferences
+  // Basic Information
+  firstName: z.string().min(1, 'First name is required').max(50, 'First name must not exceed 50 characters'),
+  lastName: z.string().min(1, 'Last name is required').max(50, 'Last name must not exceed 50 characters'),
+  dateOfBirth: z.string().optional(),
+  gender: z.enum(['MALE', 'FEMALE', 'OTHER', 'PREFER_NOT_TO_SAY']).optional(),
+  phoneNumber: z.string().regex(/^[+]?[1-9]\d{1,14}$/, 'Please provide a valid phone number').optional(),
+
+  // Physical Attributes
+  heightCm: z.number().min(100, 'Height must be at least 100cm').max(250, 'Height must not exceed 250cm').optional(),
+  currentWeightKg: z.number().min(30, 'Weight must be at least 30kg').max(300, 'Weight must not exceed 300kg').optional(),
+  targetWeightKg: z.number().min(30, 'Target weight must be at least 30kg').max(300, 'Target weight must not exceed 300kg').optional(),
+
+  // Fitness Profile
+  fitnessLevel: z.enum(['BEGINNER', 'INTERMEDIATE', 'ADVANCED', 'EXPERT']).optional(),
+  primaryGoal: z.enum(['WEIGHT_LOSS', 'MUSCLE_GAIN', 'STRENGTH_BUILDING', 'ENDURANCE', 'FLEXIBILITY', 'GENERAL_FITNESS']).optional(),
+  secondaryGoals: z.array(z.string()).optional(),
+  preferredActivityTypes: z.array(z.enum(['CARDIO', 'STRENGTH_TRAINING', 'YOGA', 'PILATES', 'HIIT', 'DANCING', 'OUTDOOR'])).optional(),
+  workoutFrequency: z.number().min(1, 'Minimum 1 workout per week').max(7, 'Maximum 7 workouts per week').optional(),
+  workoutDuration: z.number().min(15, 'Minimum 15 minutes').max(180, 'Maximum 180 minutes').optional(),
   preferredWorkoutDays: z.array(z.string()).optional(),
-  workoutDuration: z.string().optional(),
+  preferredWorkoutTimes: z.array(z.string()).optional(),
+
+  // Health Information
   dietaryRestrictions: z.array(z.string()).optional(),
-  fitnessLevel: z.enum(['beginner', 'intermediate', 'advanced']).optional(),
+  healthConditions: z.array(z.string()).optional(),
+  medications: z.array(z.string()).optional(),
+  emergencyContactName: z.string().max(100, 'Name must not exceed 100 characters').optional(),
+  emergencyContactPhone: z.string().regex(/^[+]?[1-9]\d{1,14}$/, 'Please provide a valid emergency contact phone').optional(),
+
+  // Preferences
+  timezone: z.string().optional(),
+  language: z.string().regex(/^[a-z]{2}$/, 'Language must be a valid 2-letter language code').optional(),
+  emailNotifications: z.boolean().optional(),
+  pushNotifications: z.boolean().optional(),
+  privacyLevel: z.enum(['PUBLIC', 'FRIENDS', 'PRIVATE']).optional(),
 });
 
 type ProfileSetupFormValues = z.infer<typeof profileSetupSchema>;
 
-export function ProfileSetupForm() {
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+type TabType = 'personal' | 'fitness' | 'health' | 'preferences';
+
+const tabs: { id: TabType; label: string; icon: any }[] = [
+  { id: 'personal', label: 'Personal Info', icon: User },
+  { id: 'fitness', label: 'Fitness Profile', icon: Activity },
+  { id: 'health', label: 'Health Info', icon: AlertCircle },
+  { id: 'preferences', label: 'Preferences', icon: Settings },
+];
+
+const workoutDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const workoutTimes = ['Early Morning (5-8 AM)', 'Morning (8-11 AM)', 'Afternoon (11 AM-2 PM)', 'Late Afternoon (2-5 PM)', 'Evening (5-8 PM)', 'Night (8-11 PM)'];
+const commonDietaryRestrictions = ['Vegetarian', 'Vegan', 'Gluten-Free', 'Dairy-Free', 'Keto', 'Paleo', 'Low-Carb', 'Low-Fat', 'Halal', 'Kosher'];
+const commonHealthConditions = ['Diabetes', 'High Blood Pressure', 'Heart Disease', 'Asthma', 'Arthritis', 'Back Problems', 'Knee Problems', 'None'];
+const activityTypes = [
+  { value: 'CARDIO', label: 'Cardio' },
+  { value: 'STRENGTH_TRAINING', label: 'Strength Training' },
+  { value: 'YOGA', label: 'Yoga' },
+  { value: 'PILATES', label: 'Pilates' },
+  { value: 'HIIT', label: 'HIIT' },
+  { value: 'DANCING', label: 'Dancing' },
+  { value: 'OUTDOOR', label: 'Outdoor Activities' },
+] as const;
+
+export default function ProfileSetupForm() {
+  const { setupProfile, uploadProfileImage } = useAuth();
+  const [activeTab, setActiveTab] = useState<TabType>('personal');
   const [profileImage, setProfileImage] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState('personal');
-  const [setupProgress, setSetupProgress] = useState(0);
+  const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
+  const [progress, setProgress] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { user, updateProfile } = useAuth();
-  const router = useRouter();
 
   const {
     register,
     handleSubmit,
-    formState: { errors, isValid },
+    formState: { errors },
     watch,
     setValue,
     getValues,
-    control,
+    trigger,
   } = useForm<ProfileSetupFormValues>({
     resolver: zodResolver(profileSetupSchema),
-    defaultValues: {
-      firstName: user?.profile?.firstName || '',
-      lastName: user?.profile?.lastName || '',
-      phoneNumber: user?.profile?.phoneNumber || '',
-      bio: user?.profile?.bio || '',
-      activityLevel: 'moderate',
-      fitnessGoal: 'overall_health',
-      preferredWorkoutDays: [],
-      workoutDuration: '30-45',
-      dietaryRestrictions: [],
-      fitnessLevel: 'beginner',
-    },
     mode: 'onChange',
   });
 
-  // Update progress bar based on form completion
-  const updateProgress = () => {
-    const values = getValues();
-    let completedFields = 0;
-    let totalFields = 0;
-    
-    // Count filled personal fields
-    ['firstName', 'lastName', 'phoneNumber', 'bio', 'location'].forEach(field => {
-      totalFields++;
-      if (values[field as keyof ProfileSetupFormValues]) completedFields++;
-    });
-    
-    // Count filled fitness fields
-    ['age', 'height', 'weight', 'activityLevel', 'fitnessGoal'].forEach(field => {
-      totalFields++;
-      if (values[field as keyof ProfileSetupFormValues]) completedFields++;
-    });
-    
-    // Count filled preferences fields
-    ['workoutDuration', 'fitnessLevel'].forEach(field => {
-      totalFields++;
-      if (values[field as keyof ProfileSetupFormValues]) completedFields++;
-    });
-    
-    // Count array fields
-    if (values.preferredWorkoutDays && values.preferredWorkoutDays.length > 0) {
-      completedFields++;
-    }
-    totalFields++;
-    
-    if (values.dietaryRestrictions && values.dietaryRestrictions.length > 0) {
-      completedFields++;
-    }
-    totalFields++;
-    
-    // Add profile image to counts
-    totalFields++;
-    if (profileImage) completedFields++;
-    
-    const progress = Math.round((completedFields / totalFields) * 100);
-    setSetupProgress(progress);
-  };
-
-  // Track changes for progress updates
-  const watchedValues = watch();
-  
-  // Update progress when form values change
+  // Calculate progress based on filled fields
   useEffect(() => {
-    updateProgress();
-  }, [watchedValues]);
+    const values = getValues();
+    const totalFields = Object.keys(profileSetupSchema.shape).length;
+    const filledFields = Object.values(values).filter(value => 
+      value !== undefined && value !== '' && value !== null && 
+      (Array.isArray(value) ? value.length > 0 : true)
+    ).length;
+    
+    setProgress((filledFields / totalFields) * 100);
+  }, [watch(), getValues]);
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
     if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        setError('Please select a valid image file');
+        return;
+      }
+      
+      // Validate file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        setError('Image file size must not exceed 5MB');
+        return;
+      }
+
+      setProfileImageFile(file);
       const reader = new FileReader();
       reader.onload = (e) => {
         if (e.target?.result) {
           setProfileImage(e.target.result as string);
-          updateProgress();
         }
       };
       reader.readAsDataURL(file);
@@ -163,34 +147,30 @@ export function ProfileSetupForm() {
     fileInputRef.current?.click();
   };
 
-  const nextTab = () => {
-    if (activeTab === 'personal') setActiveTab('fitness');
-    else if (activeTab === 'fitness') setActiveTab('preferences');
+  const nextTab = async () => {
+    const isValid = await trigger();
+    if (isValid) {
+      const currentIndex = tabs.findIndex(tab => tab.id === activeTab);
+      if (currentIndex < tabs.length - 1) {
+        setActiveTab(tabs[currentIndex + 1].id);
+      }
+    }
   };
 
   const previousTab = () => {
-    if (activeTab === 'preferences') setActiveTab('fitness');
-    else if (activeTab === 'fitness') setActiveTab('personal');
+    const currentIndex = tabs.findIndex(tab => tab.id === activeTab);
+    if (currentIndex > 0) {
+      setActiveTab(tabs[currentIndex - 1].id);
+    }
   };
 
-  const toggleWorkoutDay = (day: string) => {
-    const currentDays = getValues('preferredWorkoutDays') || [];
-    if (currentDays.includes(day)) {
-      setValue('preferredWorkoutDays', currentDays.filter(d => d !== day));
+  const toggleArrayValue = (fieldName: keyof ProfileSetupFormValues, value: string) => {
+    const currentValues = getValues(fieldName) as string[] || [];
+    if (currentValues.includes(value)) {
+      setValue(fieldName, currentValues.filter(v => v !== value) as any);
     } else {
-      setValue('preferredWorkoutDays', [...currentDays, day]);
+      setValue(fieldName, [...currentValues, value] as any);
     }
-    updateProgress();
-  };
-
-  const toggleDietaryRestriction = (restriction: string) => {
-    const currentRestrictions = getValues('dietaryRestrictions') || [];
-    if (currentRestrictions.includes(restriction)) {
-      setValue('dietaryRestrictions', currentRestrictions.filter(r => r !== restriction));
-    } else {
-      setValue('dietaryRestrictions', [...currentRestrictions, restriction]);
-    }
-    updateProgress();
   };
 
   const onSubmit = async (data: ProfileSetupFormValues) => {
@@ -199,16 +179,45 @@ export function ProfileSetupForm() {
     setIsLoading(true);
     
     try {
-      // Format the data for the API
-      const formattedData = {
-        ...data,
-        profileImage: profileImage || undefined,
+      // First, upload profile image if provided
+      let profileImageUrl: string | undefined;
+      if (profileImageFile) {
+        profileImageUrl = await uploadProfileImage(profileImageFile);
+      }
+
+      // Convert form data to match backend DTO
+      const profileData: ProfileSetupRequest = {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        dateOfBirth: data.dateOfBirth,
+        gender: data.gender,
+        phoneNumber: data.phoneNumber,
+        heightCm: data.heightCm,
+        currentWeightKg: data.currentWeightKg,
+        targetWeightKg: data.targetWeightKg,
+        fitnessLevel: data.fitnessLevel,
+        primaryGoal: data.primaryGoal,
+        secondaryGoals: data.secondaryGoals,
+        preferredActivityTypes: data.preferredActivityTypes,
+        workoutFrequency: data.workoutFrequency,
+        workoutDuration: data.workoutDuration,
+        preferredWorkoutDays: data.preferredWorkoutDays,
+        preferredWorkoutTimes: data.preferredWorkoutTimes,
+        dietaryRestrictions: data.dietaryRestrictions,
+        healthConditions: data.healthConditions,
+        medications: data.medications,
+        emergencyContactName: data.emergencyContactName,
+        emergencyContactPhone: data.emergencyContactPhone,
+        timezone: data.timezone,
+        language: data.language || 'en',
+        emailNotifications: data.emailNotifications ?? true,
+        pushNotifications: data.pushNotifications ?? true,
+        privacyLevel: data.privacyLevel || 'FRIENDS',
       };
       
-      // Update the profile - this will trigger redirect in AuthContext
-      await updateProfile(formattedData);
+      // Setup the profile - this will trigger redirect in AuthContext
+      await setupProfile(profileData);
       
-      // Show success message briefly before redirect
       setSuccessMessage("Your profile has been successfully set up! Redirecting to your dashboard...");
       
     } catch (err: any) {
@@ -219,459 +228,553 @@ export function ProfileSetupForm() {
     }
   };
 
-  // Watch form inputs to enable/disable the "Next" button
-  const firstName = watch('firstName');
-  const lastName = watch('lastName');
-  const isPersonalInfoComplete = firstName && lastName;
+  const currentTabIndex = tabs.findIndex(tab => tab.id === activeTab);
+  const isLastTab = currentTabIndex === tabs.length - 1;
+  const isFirstTab = currentTabIndex === 0;
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader className="space-y-2 text-center">
-        <CardTitle className="text-2xl">Complete Your Profile</CardTitle>
-        <CardDescription>
-          Let's personalize your experience to help you achieve your fitness goals
-        </CardDescription>
-        <div className="mt-4">
-          <Progress value={setupProgress} className="h-2" />
-          <p className="text-xs text-neutral-500 mt-1 text-right">{setupProgress}% Complete</p>
-        </div>
-      </CardHeader>
-      <CardContent>
-        {error && (
-          <Alert variant="destructive" className="mb-4">
-            <AlertTriangle className="h-4 w-4 mr-2" />
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-        
-        {successMessage && (
-          <Alert className="mb-4 bg-green-50 border-green-200">
-            <CheckCircle className="h-4 w-4 mr-2 text-green-600" />
-            <AlertDescription className="text-green-800">{successMessage}</AlertDescription>
-          </Alert>
-        )}
-        
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-3 mb-8">
-              <TabsTrigger value="personal">Personal Information</TabsTrigger>
-              <TabsTrigger 
-                value="fitness" 
-                disabled={!isPersonalInfoComplete}
-              >
-                Fitness Profile
-              </TabsTrigger>
-              <TabsTrigger 
-                value="preferences" 
-                disabled={!isPersonalInfoComplete}
-              >
-                Preferences
-              </TabsTrigger>
-            </TabsList>
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-4xl">
+        <Card className="shadow-2xl border-0">
+          <CardHeader className="text-center space-y-4 pb-8">
+            <CardTitle className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
+              Complete Your Profile
+            </CardTitle>
+            <CardDescription className="text-lg text-gray-600">
+              Help us personalize your fitness journey
+            </CardDescription>
             
-            {/* Personal Information Tab */}
-            <TabsContent value="personal" className="space-y-6">
-              {/* Profile image upload */}
-              <div className="flex flex-col items-center justify-center mb-6">
-                <div className="relative h-24 w-24 mb-4">
-                  {profileImage ? (
-                    <Image 
-                      src={profileImage} 
-                      alt="Profile preview" 
-                      fill
-                      className="rounded-full object-cover border-4 border-primary/20"
-                    />
-                  ) : (
-                    <div className="h-24 w-24 rounded-full bg-neutral-100 flex items-center justify-center border-4 border-primary/20">
-                      <User className="h-12 w-12 text-neutral-400" />
+            {/* Progress Bar */}
+            <div className="space-y-2">
+              <Progress value={progress} className="h-3" />
+              <p className="text-sm text-gray-500">{Math.round(progress)}% Complete</p>
+            </div>
+
+            {/* Tab Navigation */}
+            <div className="flex justify-center space-x-1 bg-gray-100 rounded-lg p-1">
+              {tabs.map((tab, index) => {
+                const IconComponent = tab.icon;
+                const isActive = tab.id === activeTab;
+                const isCompleted = index < currentTabIndex;
+                
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                      isActive
+                        ? 'bg-white text-purple-600 shadow-sm'
+                        : isCompleted
+                        ? 'text-green-600 hover:text-green-700'
+                        : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    {isCompleted ? (
+                      <Check className="h-4 w-4" />
+                    ) : (
+                      <IconComponent className="h-4 w-4" />
+                    )}
+                    <span className="hidden sm:inline">{tab.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </CardHeader>
+
+          <CardContent className="space-y-6">
+            {/* Error and Success Messages */}
+            {error && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
+            {successMessage && (
+              <Alert className="border-green-200 bg-green-50">
+                <Check className="h-4 w-4 text-green-600" />
+                <AlertDescription className="text-green-700">{successMessage}</AlertDescription>
+              </Alert>
+            )}
+
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              {/* Personal Information Tab */}
+              {activeTab === 'personal' && (
+                <div className="space-y-6">
+                  <div className="text-center">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-4">Personal Information</h3>
+                    
+                    {/* Profile Picture Upload */}
+                    <div className="flex flex-col items-center space-y-4 mb-6">
+                      <div className="relative">
+                        <div className="w-24 h-24 rounded-full bg-gray-200 overflow-hidden">
+                          {profileImage ? (
+                            <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <User className="h-12 w-12 text-gray-400" />
+                            </div>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={triggerFileInput}
+                          className="absolute bottom-0 right-0 bg-purple-600 text-white rounded-full p-2 hover:bg-purple-700 transition-colors"
+                        >
+                          <Upload className="h-4 w-4" />
+                        </button>
+                      </div>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                      />
+                      <p className="text-sm text-gray-500">Upload your profile picture (optional)</p>
                     </div>
-                  )}
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="firstName">First Name *</Label>
+                      <Input
+                        id="firstName"
+                        {...register('firstName')}
+                        className={errors.firstName ? 'border-red-500' : ''}
+                      />
+                      {errors.firstName && (
+                        <p className="text-sm text-red-500">{errors.firstName.message}</p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="lastName">Last Name *</Label>
+                      <Input
+                        id="lastName"
+                        {...register('lastName')}
+                        className={errors.lastName ? 'border-red-500' : ''}
+                      />
+                      {errors.lastName && (
+                        <p className="text-sm text-red-500">{errors.lastName.message}</p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="dateOfBirth">Date of Birth</Label>
+                      <Input
+                        id="dateOfBirth"
+                        type="date"
+                        {...register('dateOfBirth')}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="gender">Gender</Label>
+                      <Select onValueChange={(value) => setValue('gender', value as any)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select gender" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="MALE">Male</SelectItem>
+                          <SelectItem value="FEMALE">Female</SelectItem>
+                          <SelectItem value="OTHER">Other</SelectItem>
+                          <SelectItem value="PREFER_NOT_TO_SAY">Prefer not to say</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2 md:col-span-2">
+                      <Label htmlFor="phoneNumber">Phone Number</Label>
+                      <Input
+                        id="phoneNumber"
+                        {...register('phoneNumber')}
+                        placeholder="+1234567890"
+                        className={errors.phoneNumber ? 'border-red-500' : ''}
+                      />
+                      {errors.phoneNumber && (
+                        <p className="text-sm text-red-500">{errors.phoneNumber.message}</p>
+                      )}
+                    </div>
+                  </div>
                 </div>
-                <input
-                  type="file"
-                  accept="image/*"
-                  ref={fileInputRef}
-                  onChange={handleImageUpload}
-                  className="hidden"
-                />
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  size="sm"
-                  onClick={triggerFileInput}
+              )}
+
+              {/* Fitness Profile Tab */}
+              {activeTab === 'fitness' && (
+                <div className="space-y-6">
+                  <h3 className="text-xl font-semibold text-gray-900 text-center mb-4">Fitness Profile</h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="heightCm">Height (cm)</Label>
+                      <Input
+                        id="heightCm"
+                        type="number"
+                        {...register('heightCm', { valueAsNumber: true })}
+                        placeholder="170"
+                        className={errors.heightCm ? 'border-red-500' : ''}
+                      />
+                      {errors.heightCm && (
+                        <p className="text-sm text-red-500">{errors.heightCm.message}</p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="currentWeightKg">Current Weight (kg)</Label>
+                      <Input
+                        id="currentWeightKg"
+                        type="number"
+                        {...register('currentWeightKg', { valueAsNumber: true })}
+                        placeholder="70"
+                        className={errors.currentWeightKg ? 'border-red-500' : ''}
+                      />
+                      {errors.currentWeightKg && (
+                        <p className="text-sm text-red-500">{errors.currentWeightKg.message}</p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="targetWeightKg">Target Weight (kg)</Label>
+                      <Input
+                        id="targetWeightKg"
+                        type="number"
+                        {...register('targetWeightKg', { valueAsNumber: true })}
+                        placeholder="65"
+                        className={errors.targetWeightKg ? 'border-red-500' : ''}
+                      />
+                      {errors.targetWeightKg && (
+                        <p className="text-sm text-red-500">{errors.targetWeightKg.message}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="fitnessLevel">Fitness Level</Label>
+                      <Select onValueChange={(value) => setValue('fitnessLevel', value as any)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select fitness level" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="BEGINNER">Beginner</SelectItem>
+                          <SelectItem value="INTERMEDIATE">Intermediate</SelectItem>
+                          <SelectItem value="ADVANCED">Advanced</SelectItem>
+                          <SelectItem value="EXPERT">Expert</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="primaryGoal">Primary Goal</Label>
+                      <Select onValueChange={(value) => setValue('primaryGoal', value as any)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select primary goal" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="WEIGHT_LOSS">Weight Loss</SelectItem>
+                          <SelectItem value="MUSCLE_GAIN">Muscle Gain</SelectItem>
+                          <SelectItem value="STRENGTH_BUILDING">Strength Building</SelectItem>
+                          <SelectItem value="ENDURANCE">Endurance</SelectItem>
+                          <SelectItem value="FLEXIBILITY">Flexibility</SelectItem>
+                          <SelectItem value="GENERAL_FITNESS">General Fitness</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <Label>Preferred Activity Types</Label>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                      {activityTypes.map((activity) => (
+                        <div key={activity.value} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={activity.value}
+                            checked={(getValues('preferredActivityTypes') || []).includes(activity.value)}
+                            onCheckedChange={() => toggleArrayValue('preferredActivityTypes', activity.value)}
+                          />
+                          <Label htmlFor={activity.value} className="text-sm">
+                            {activity.label}
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="workoutFrequency">Workouts per Week</Label>
+                      <Input
+                        id="workoutFrequency"
+                        type="number"
+                        min="1"
+                        max="7"
+                        {...register('workoutFrequency', { valueAsNumber: true })}
+                        placeholder="3"
+                        className={errors.workoutFrequency ? 'border-red-500' : ''}
+                      />
+                      {errors.workoutFrequency && (
+                        <p className="text-sm text-red-500">{errors.workoutFrequency.message}</p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="workoutDuration">Workout Duration (minutes)</Label>
+                      <Input
+                        id="workoutDuration"
+                        type="number"
+                        min="15"
+                        max="180"
+                        {...register('workoutDuration', { valueAsNumber: true })}
+                        placeholder="60"
+                        className={errors.workoutDuration ? 'border-red-500' : ''}
+                      />
+                      {errors.workoutDuration && (
+                        <p className="text-sm text-red-500">{errors.workoutDuration.message}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <Label>Preferred Workout Days</Label>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      {workoutDays.map((day) => (
+                        <div key={day} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={day}
+                            checked={(getValues('preferredWorkoutDays') || []).includes(day)}
+                            onCheckedChange={() => toggleArrayValue('preferredWorkoutDays', day)}
+                          />
+                          <Label htmlFor={day} className="text-sm">
+                            {day}
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <Label>Preferred Workout Times</Label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {workoutTimes.map((time) => (
+                        <div key={time} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={time}
+                            checked={(getValues('preferredWorkoutTimes') || []).includes(time)}
+                            onCheckedChange={() => toggleArrayValue('preferredWorkoutTimes', time)}
+                          />
+                          <Label htmlFor={time} className="text-sm">
+                            {time}
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Health Information Tab */}
+              {activeTab === 'health' && (
+                <div className="space-y-6">
+                  <h3 className="text-xl font-semibold text-gray-900 text-center mb-4">Health Information</h3>
+                  
+                  <div className="space-y-4">
+                    <Label>Dietary Restrictions</Label>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                      {commonDietaryRestrictions.map((restriction) => (
+                        <div key={restriction} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={restriction}
+                            checked={(getValues('dietaryRestrictions') || []).includes(restriction)}
+                            onCheckedChange={() => toggleArrayValue('dietaryRestrictions', restriction)}
+                          />
+                          <Label htmlFor={restriction} className="text-sm">
+                            {restriction}
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <Label>Health Conditions</Label>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                      {commonHealthConditions.map((condition) => (
+                        <div key={condition} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={condition}
+                            checked={(getValues('healthConditions') || []).includes(condition)}
+                            onCheckedChange={() => toggleArrayValue('healthConditions', condition)}
+                          />
+                          <Label htmlFor={condition} className="text-sm">
+                            {condition}
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="medications">Current Medications (optional)</Label>
+                    <Textarea
+                      id="medications"
+                      placeholder="List any medications you're currently taking..."
+                      className="min-h-[100px]"
+                      onChange={(e) => setValue('medications', e.target.value.split('\n').filter(med => med.trim()))}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="emergencyContactName">Emergency Contact Name</Label>
+                      <Input
+                        id="emergencyContactName"
+                        {...register('emergencyContactName')}
+                        placeholder="John Doe"
+                        className={errors.emergencyContactName ? 'border-red-500' : ''}
+                      />
+                      {errors.emergencyContactName && (
+                        <p className="text-sm text-red-500">{errors.emergencyContactName.message}</p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="emergencyContactPhone">Emergency Contact Phone</Label>
+                      <Input
+                        id="emergencyContactPhone"
+                        {...register('emergencyContactPhone')}
+                        placeholder="+1234567890"
+                        className={errors.emergencyContactPhone ? 'border-red-500' : ''}
+                      />
+                      {errors.emergencyContactPhone && (
+                        <p className="text-sm text-red-500">{errors.emergencyContactPhone.message}</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Preferences Tab */}
+              {activeTab === 'preferences' && (
+                <div className="space-y-6">
+                  <h3 className="text-xl font-semibold text-gray-900 text-center mb-4">Preferences</h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="timezone">Timezone</Label>
+                      <Input
+                        id="timezone"
+                        {...register('timezone')}
+                        placeholder="America/New_York"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="language">Language</Label>
+                      <Select onValueChange={(value) => setValue('language', value)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select language" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="en">English</SelectItem>
+                          <SelectItem value="es">Spanish</SelectItem>
+                          <SelectItem value="fr">French</SelectItem>
+                          <SelectItem value="de">German</SelectItem>
+                          <SelectItem value="it">Italian</SelectItem>
+                          <SelectItem value="pt">Portuguese</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="privacyLevel">Privacy Level</Label>
+                    <Select onValueChange={(value) => setValue('privacyLevel', value as any)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select privacy level" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="PUBLIC">Public</SelectItem>
+                        <SelectItem value="FRIENDS">Friends Only</SelectItem>
+                        <SelectItem value="PRIVATE">Private</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-4">
+                    <Label>Notification Preferences</Label>
+                    <div className="space-y-3">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="emailNotifications"
+                          checked={getValues('emailNotifications') ?? true}
+                          onCheckedChange={(checked) => setValue('emailNotifications', !!checked)}
+                        />
+                        <Label htmlFor="emailNotifications">
+                          Email notifications for updates and reminders
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="pushNotifications"
+                          checked={getValues('pushNotifications') ?? true}
+                          onCheckedChange={(checked) => setValue('pushNotifications', !!checked)}
+                        />
+                        <Label htmlFor="pushNotifications">
+                          Push notifications for workout reminders
+                        </Label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Navigation Buttons */}
+              <div className="flex justify-between pt-6">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={previousTab}
+                  disabled={isFirstTab}
+                  className="flex items-center space-x-2"
                 >
-                  <Upload className="h-4 w-4 mr-2" />
-                  Upload Photo
+                  <ArrowLeft className="h-4 w-4" />
+                  <span>Previous</span>
                 </Button>
-              </div>
-              
-              {/* Personal information fields */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="firstName">First Name <span className="text-red-500">*</span></Label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500" />
-                    <Input
-                      id="firstName"
-                      className={`pl-10 ${errors.firstName ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
-                      disabled={isLoading}
-                      {...register('firstName')}
-                      onChange={(e) => {
-                        register('firstName').onChange(e);
-                        updateProgress();
-                      }}
-                    />
-                  </div>
-                  {errors.firstName && (
-                    <p className="text-sm text-red-500">{errors.firstName.message}</p>
-                  )}
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="lastName">Last Name <span className="text-red-500">*</span></Label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500" />
-                    <Input
-                      id="lastName"
-                      className={`pl-10 ${errors.lastName ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
-                      disabled={isLoading}
-                      {...register('lastName')}
-                      onChange={(e) => {
-                        register('lastName').onChange(e);
-                        updateProgress();
-                      }}
-                    />
-                  </div>
-                  {errors.lastName && (
-                    <p className="text-sm text-red-500">{errors.lastName.message}</p>
-                  )}
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="phoneNumber">Phone Number (Optional)</Label>
-                  <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500" />
-                    <Input
-                      id="phoneNumber"
-                      placeholder="(123) 456-7890"
-                      className="pl-10"
-                      disabled={isLoading}
-                      {...register('phoneNumber')}
-                      onChange={(e) => {
-                        register('phoneNumber').onChange(e);
-                        updateProgress();
-                      }}
-                    />
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="location">Location (Optional)</Label>
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500" />
-                    <Input
-                      id="location"
-                      placeholder="City, Country"
-                      className="pl-10"
-                      disabled={isLoading}
-                      {...register('location')}
-                      onChange={(e) => {
-                        register('location').onChange(e);
-                        updateProgress();
-                      }}
-                    />
-                  </div>
-                </div>
-                
-                <div className="space-y-2 md:col-span-2">
-                  <Label htmlFor="bio">Bio (Optional)</Label>
-                  <Textarea
-                    id="bio"
-                    placeholder="Tell us a bit about yourself and your fitness journey..."
-                    className="resize-none h-24"
+
+                {isLastTab ? (
+                  <Button
+                    type="submit"
                     disabled={isLoading}
-                    {...register('bio')}
-                    onChange={(e) => {
-                      register('bio').onChange(e);
-                      updateProgress();
-                    }}
-                  />
-                  {errors.bio && (
-                    <p className="text-sm text-red-500">{errors.bio.message}</p>
-                  )}
-                  <p className="text-xs text-neutral-500 text-right">
-                    {watch('bio')?.length || 0}/500 characters
-                  </p>
-                </div>
-              </div>
-              
-              <div className="flex justify-end mt-4">
-                <Button 
-                  type="button" 
-                  onClick={nextTab}
-                  disabled={!isPersonalInfoComplete}
-                >
-                  Next: Fitness Profile <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </div>
-            </TabsContent>
-            
-            {/* Fitness Information Tab */}
-            <TabsContent value="fitness" className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="age">Age (Optional)</Label>
-                  <div className="relative">
-                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500" />
-                    <Input
-                      id="age"
-                      type="number"
-                      placeholder="25"
-                      className="pl-10"
-                      disabled={isLoading}
-                      {...register('age')}
-                      onChange={(e) => {
-                        register('age').onChange(e);
-                        updateProgress();
-                      }}
-                    />
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="height">Height in cm (Optional)</Label>
-                  <div className="relative">
-                    <Ruler className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500" />
-                    <Input
-                      id="height"
-                      type="number"
-                      placeholder="165"
-                      className="pl-10"
-                      disabled={isLoading}
-                      {...register('height')}
-                      onChange={(e) => {
-                        register('height').onChange(e);
-                        updateProgress();
-                      }}
-                    />
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="weight">Weight in kg (Optional)</Label>
-                  <div className="relative">
-                    <Weight className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500" />
-                    <Input
-                      id="weight"
-                      type="number"
-                      placeholder="65"
-                      className="pl-10"
-                      disabled={isLoading}
-                      {...register('weight')}
-                      onChange={(e) => {
-                        register('weight').onChange(e);
-                        updateProgress();
-                      }}
-                    />
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="fitnessLevel">Fitness Level</Label>
-                  <Select 
-                    onValueChange={(value) => {
-                      setValue('fitnessLevel', value as any);
-                      updateProgress();
-                    }}
-                    defaultValue={watch('fitnessLevel')}
+                    className="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 flex items-center space-x-2"
                   >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select your fitness level" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="beginner">Beginner</SelectItem>
-                      <SelectItem value="intermediate">Intermediate</SelectItem>
-                      <SelectItem value="advanced">Advanced</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="space-y-2 md:col-span-2">
-                  <Label>Activity Level</Label>
-                  <RadioGroup 
-                    defaultValue="moderate" 
-                    value={watch('activityLevel')}
-                    onValueChange={(value) => {
-                      setValue('activityLevel', value as any);
-                      updateProgress();
-                    }}
+                    {isLoading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        <span>Setting up...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Check className="h-4 w-4" />
+                        <span>Complete Setup</span>
+                      </>
+                    )}
+                  </Button>
+                ) : (
+                  <Button
+                    type="button"
+                    onClick={nextTab}
+                    className="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 flex items-center space-x-2"
                   >
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="sedentary" id="sedentary" />
-                        <Label htmlFor="sedentary" className="cursor-pointer">Sedentary</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="light" id="light" />
-                        <Label htmlFor="light" className="cursor-pointer">Lightly Active</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="moderate" id="moderate" />
-                        <Label htmlFor="moderate" className="cursor-pointer">Moderately Active</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="active" id="active" />
-                        <Label htmlFor="active" className="cursor-pointer">Very Active</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="very_active" id="very_active" />
-                        <Label htmlFor="very_active" className="cursor-pointer">Extremely Active</Label>
-                      </div>
-                    </div>
-                  </RadioGroup>
-                </div>
-                
-                <div className="space-y-2 md:col-span-2">
-                  <Label>Fitness Goal</Label>
-                  <RadioGroup 
-                    defaultValue="overall_health" 
-                    value={watch('fitnessGoal')}
-                    onValueChange={(value) => {
-                      setValue('fitnessGoal', value as any);
-                      updateProgress();
-                    }}
-                  >
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="weight_loss" id="weight_loss" />
-                        <Label htmlFor="weight_loss" className="cursor-pointer">Weight Loss</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="muscle_gain" id="muscle_gain" />
-                        <Label htmlFor="muscle_gain" className="cursor-pointer">Muscle Gain</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="maintenance" id="maintenance" />
-                        <Label htmlFor="maintenance" className="cursor-pointer">Maintenance</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="overall_health" id="overall_health" />
-                        <Label htmlFor="overall_health" className="cursor-pointer">Overall Health</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="flexibility" id="flexibility" />
-                        <Label htmlFor="flexibility" className="cursor-pointer">Flexibility</Label>
-                      </div>
-                    </div>
-                  </RadioGroup>
-                </div>
+                    <span>Next</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                )}
               </div>
-              
-              <div className="flex justify-between mt-4">
-                <Button 
-                  type="button" 
-                  variant="outline"
-                  onClick={previousTab}
-                >
-                  <ArrowLeft className="mr-2 h-4 w-4" /> Back
-                </Button>
-                <Button 
-                  type="button" 
-                  onClick={nextTab}
-                >
-                  Next: Preferences <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </div>
-            </TabsContent>
-            
-            {/* Preferences Tab */}
-            <TabsContent value="preferences" className="space-y-6">
-              <div className="space-y-6">
-                <div>
-                  <Label className="block mb-3">Preferred Workout Days</Label>
-                  <div className="grid grid-cols-2 md:grid-cols-7 gap-2">
-                    {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => {
-                      const isSelected = watch('preferredWorkoutDays')?.includes(day);
-                      return (
-                        <Button
-                          key={day}
-                          type="button"
-                          variant={isSelected ? 'default' : 'outline'}
-                          className={`py-1 h-10 ${isSelected ? 'bg-primary' : ''}`}
-                          onClick={() => toggleWorkoutDay(day)}
-                        >
-                          {day.slice(0, 3)}
-                        </Button>
-                      );
-                    })}
-                  </div>
-                </div>
-                
-                <div>
-                  <Label htmlFor="workoutDuration">Preferred Workout Duration</Label>
-                  <Select 
-                    onValueChange={(value) => {
-                      setValue('workoutDuration', value);
-                      updateProgress();
-                    }}
-                    defaultValue={watch('workoutDuration')}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select workout duration" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="15-30">15-30 minutes</SelectItem>
-                      <SelectItem value="30-45">30-45 minutes</SelectItem>
-                      <SelectItem value="45-60">45-60 minutes</SelectItem>
-                      <SelectItem value="60+">60+ minutes</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div>
-                  <Label className="block mb-3">Dietary Restrictions (if any)</Label>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                    {['Vegetarian', 'Vegan', 'Gluten-Free', 'Dairy-Free', 'Nut-Free', 'Keto', 'Paleo', 'None'].map((restriction) => {
-                      const isSelected = watch('dietaryRestrictions')?.includes(restriction);
-                      return (
-                        <Button
-                          key={restriction}
-                          type="button"
-                          variant={isSelected ? 'default' : 'outline'}
-                          className={`py-1 h-10 ${isSelected ? 'bg-primary' : ''}`}
-                          onClick={() => toggleDietaryRestriction(restriction)}
-                        >
-                          {restriction}
-                        </Button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-              
-              <div className="flex justify-between mt-4">
-                <Button 
-                  type="button" 
-                  variant="outline"
-                  onClick={previousTab}
-                >
-                  <ArrowLeft className="mr-2 h-4 w-4" /> Back
-                </Button>
-                <Button 
-                  type="submit" 
-                  disabled={isLoading}
-                >
-                  {isLoading ? <LoadingSpinner size="sm" className="mr-2" /> : null}
-                  {isLoading ? 'Saving Profile...' : 'Complete Setup'}
-                </Button>
-              </div>
-            </TabsContent>
-          </Tabs>
-        </form>
-      </CardContent>
-      <CardFooter className="text-center text-sm text-neutral-500">
-        You can always update your profile information later from your account settings.
-      </CardFooter>
-    </Card>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 }

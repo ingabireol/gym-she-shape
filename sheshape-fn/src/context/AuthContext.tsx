@@ -8,8 +8,9 @@ import {
   ReactNode,
 } from 'react';
 import { useRouter } from 'next/navigation';
-import { User, Profile, ProfileUpdateRequest } from '@/types/user';
+import { User, UserProfile } from '@/types/user';
 import { authService } from '@/services/authService';
+import { profileService, ProfileSetupRequest, ProfileUpdateRequest, ProfileResponse } from '@/services/profileService';
 import { api } from '@/lib/api';
 import { toast } from 'react-toastify';
 
@@ -21,6 +22,7 @@ interface AuthContextType {
   register: (username: string, email: string, password: string, role?: string) => Promise<void>;
   logout: () => void;
   updateUser: (userData: Partial<User>) => Promise<void>;
+  setupProfile: (profileData: ProfileSetupRequest) => Promise<void>;
   updateProfile: (profileData: ProfileUpdateRequest) => Promise<void>;
   uploadProfileImage: (file: File) => Promise<string>;
   requestPasswordReset: (email: string) => Promise<void>;
@@ -89,6 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsLoading(true);
       const userData = await authService.getCurrentUser();
       setUser(userData);
+      console.log(userData);
     } catch (error) {
       console.error('Failed to fetch user:', error);
       localStorage.removeItem('token');
@@ -97,18 +100,55 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Helper function to convert ProfileResponse to UserProfile
+  const mapProfileResponseToUserProfile = (profileResponse: ProfileResponse): UserProfile => {
+    return {
+      id: profileResponse.id,
+      firstName: profileResponse.firstName,
+      lastName: profileResponse.lastName,
+      dateOfBirth: profileResponse.dateOfBirth,
+      gender: profileResponse.gender as UserProfile['gender'],
+      phoneNumber: profileResponse.phoneNumber,
+      profilePictureUrl: profileResponse.profilePictureUrl,
+      heightCm: profileResponse.heightCm,
+      currentWeightKg: profileResponse.currentWeightKg,
+      targetWeightKg: profileResponse.targetWeightKg,
+      fitnessLevel: profileResponse.fitnessLevel as UserProfile['fitnessLevel'],
+      primaryGoal: profileResponse.primaryGoal as UserProfile['primaryGoal'],
+      secondaryGoals: profileResponse.secondaryGoals,
+      preferredActivityTypes: profileResponse.preferredActivityTypes as UserProfile['preferredActivityTypes'],
+      workoutFrequency: profileResponse.workoutFrequency,
+      workoutDuration: profileResponse.workoutDuration,
+      preferredWorkoutDays: profileResponse.preferredWorkoutDays,
+      preferredWorkoutTimes: profileResponse.preferredWorkoutTimes,
+      dietaryRestrictions: profileResponse.dietaryRestrictions,
+      healthConditions: profileResponse.healthConditions,
+      medications: profileResponse.medications,
+      emergencyContactName: profileResponse.emergencyContactName,
+      emergencyContactPhone: profileResponse.emergencyContactPhone,
+      timezone: profileResponse.timezone,
+      language: profileResponse.language,
+      emailNotifications: profileResponse.emailNotifications,
+      pushNotifications: profileResponse.pushNotifications,
+      privacyLevel: profileResponse.privacyLevel as UserProfile['privacyLevel'],
+      createdAt: profileResponse.createdAt,
+      updatedAt: profileResponse.updatedAt,
+    };
+  };
+
   // Helper function to determine redirect path based on user state
   const getRedirectPath = (userData: User) => {
+    console.log(userData)
     // Admin users always go to admin dashboard
     if (userData.role === 'ADMIN') {
       return '/admin';
     }
-
-    // Check if profile is complete (has firstName and lastName)
-    const hasCompleteProfile = userData.profile?.firstName && userData.profile?.lastName;
-
-    if (!hasCompleteProfile) {
+    console.log("Inside redirect path");
+    // Check if profile is complete using the profileCompleted flag from backend
+    if (!userData.profileCompleted) {
       // First time user or incomplete profile -> profile setup
+      console.log(userData)
+      // alert(userData)
       return '/profile-setup';
     } else {
       // Returning user with complete profile -> dashboard
@@ -180,10 +220,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       const response = await api.put(`/api/users/${user.id}`, userData);
       setUser(response.data);
-      toast.success('Profile updated successfully');
+      toast.success('User data updated successfully');
     } catch (error) {
       console.error('Failed to update user:', error);
-      toast.error('Failed to update profile');
+      toast.error('Failed to update user data');
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Setup profile (first time)
+  const setupProfile = async (profileData: ProfileSetupRequest) => {
+    try {
+      setIsLoading(true);
+      if (!user) throw new Error('No user is logged in');
+      
+      const profileResponse = await profileService.setupProfile(profileData);
+      
+      // Update user state with new profile data
+      setUser(prevUser => {
+        if (!prevUser) return null;
+        
+        return {
+          ...prevUser,
+          profileCompleted: true,
+          profile: mapProfileResponseToUserProfile(profileResponse)
+        };
+      });
+      
+      toast.success('Profile setup completed successfully');
+      
+      // Redirect to dashboard after successful profile setup
+      router.push('/dashboard');
+      
+    } catch (error) {
+      console.error('Failed to setup profile:', error);
+      toast.error('Failed to setup profile. Please try again.');
       throw error;
     } finally {
       setIsLoading(false);
@@ -196,18 +269,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsLoading(true);
       if (!user) throw new Error('No user is logged in');
       
-      const response = await authService.updateProfile(user.id, profileData);
-      setUser(response);
+      const profileResponse = await profileService.updateProfile(profileData);
+      
+      // Update user state with new profile data
+      setUser(prevUser => {
+        if (!prevUser) return null;
+        
+        return {
+          ...prevUser,
+          profile: mapProfileResponseToUserProfile(profileResponse)
+        };
+      });
+      
       toast.success('Profile updated successfully');
-      
-      // After successful profile update, check if we should redirect
-      // This is especially important for first-time profile setup
-      const redirectPath = getRedirectPath(response);
-      
-      // Only redirect if we're currently on the profile setup page
-      if (window.location.pathname === '/profile-setup') {
-        router.push(redirectPath);
-      }
       
     } catch (error) {
       console.error('Failed to update profile:', error);
@@ -224,25 +298,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsLoading(true);
       if (!user) throw new Error('No user is logged in');
       
-      const imageUrl = await authService.uploadProfileImage(user.id, file);
+      const response = await profileService.uploadProfilePicture(file);
       
       // Update user state with new profile image
       setUser(prevUser => {
         if (!prevUser) return null;
         
-        const updatedProfile: Profile = {
-          ...prevUser.profile,
-          profileImage: imageUrl
-        };
-        
         return {
           ...prevUser,
-          profile: updatedProfile
+          profile: {
+            ...prevUser.profile,
+            profilePictureUrl: response.profilePictureUrl
+          }
         };
       });
       
       toast.success('Profile image updated');
-      return imageUrl;
+      return response.profilePictureUrl;
     } catch (error) {
       console.error('Failed to upload profile image:', error);
       toast.error('Failed to upload profile image');
@@ -257,11 +329,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setIsLoading(true);
       await authService.requestPasswordReset(email);
-      // We don't confirm whether the email exists for security reasons
       toast.success('If an account exists with this email, you will receive password reset instructions shortly.');
     } catch (error) {
       console.error('Password reset request failed:', error);
-      // Still show success message even on error for security reasons
       toast.success('If an account exists with this email, you will receive password reset instructions shortly.');
     } finally {
       setIsLoading(false);
@@ -311,6 +381,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         register,
         logout,
         updateUser,
+        setupProfile,
         updateProfile,
         uploadProfileImage,
         requestPasswordReset,

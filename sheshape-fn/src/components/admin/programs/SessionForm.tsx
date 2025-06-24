@@ -187,7 +187,6 @@ export function SessionForm({ programId, sessionId, mode }: SessionFormProps) {
           <ArrowLeft className="mr-2 h-4 w-4" /> Back to Program
         </Button>
       </div>
-      // src/components/admin/programs/SessionForm.tsx (continued)
       <Card>
         <CardHeader>
           <CardTitle>{mode === 'create' ? 'Add New Session' : 'Edit Session'}</CardTitle>
