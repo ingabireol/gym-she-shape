@@ -51,14 +51,12 @@ import {
 import { 
   Plus, 
   Search, 
-  Filter, 
   MoreVertical,
   Edit,
   Copy,
   Trash,
   Eye,
   Check,
-  X,
   ArrowUpDown,
   EyeOff,
   Tag

@@ -1,11 +1,9 @@
 // src/components/admin/analytics/DateRangePicker.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { Calendar as CalendarIcon } from 'lucide-react';
 import { DateRange } from 'react-day-picker';
-import { DayPicker } from 'react-day-picker';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/Calendar';
 import {
@@ -13,7 +11,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { cn } from '@/lib/utils';
 
 interface DateRangePickerProps {
   value: DateRange;

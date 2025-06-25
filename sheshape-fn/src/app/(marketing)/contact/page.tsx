@@ -5,7 +5,6 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { api } from '@/lib/api';
 import { toast } from 'react-toastify';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -158,7 +157,7 @@ export default function ContactPage() {
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="mb-6">Get In Touch</h1>
             <p className="text-xl md:text-2xl text-neutral-700 leading-relaxed">
-              Have questions about SheShape? We're here to help you on your fitness journey.
+              Have questions about SheShape? We&apos;re here to help you on your fitness journey.
             </p>
           </div>
         </div>
@@ -289,7 +288,7 @@ export default function ContactPage() {
                   <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
                   <h3 className="text-xl font-medium text-green-800 mb-2">Thank You!</h3>
                   <p className="text-green-700">
-                    Your message has been received. We'll get back to you as soon as possible.
+                    Your message has been received. We&apos;ll get back to you as soon as possible.
                   </p>
                 </div>
               ) : (
@@ -426,7 +425,7 @@ export default function ContactPage() {
             
             <div className="mt-10 text-center">
               <p className="text-neutral-600 mb-4">
-                Didn't find what you're looking for?
+                Didn&apos;t find what you&apos;re looking for?
               </p>
               <Button asChild>
                 <Link href="/help">

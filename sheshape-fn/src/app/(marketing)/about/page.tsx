@@ -20,7 +20,7 @@ export default function AboutPage() {
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="mb-6">Our Mission</h1>
             <p className="text-xl md:text-2xl text-neutral-700 leading-relaxed mb-8">
-              At SheShape, we're dedicated to empowering women through fitness, nutrition, and community support. We believe every woman deserves to feel strong, confident, and healthy in her body.
+              At SheShape, we&apos;re dedicated to empowering women through fitness, nutrition, and community support. We believe every woman deserves to feel strong, confident, and healthy in her body.
             </p>
             <Button size="lg" asChild>
               <Link href="/programs">
@@ -38,7 +38,7 @@ export default function AboutPage() {
             <div className="order-2 lg:order-1">
               <h2 className="mb-6">Our Story</h2>
               <p className="text-neutral-600 mb-4">
-                SheShape was founded in 2020 by fitness trainer Sarah Johnson and nutritionist Emma Chen, who recognized a significant gap in the fitness industry: programs designed specifically for women's unique physiological needs and goals.
+                SheShape was founded in 2020 by fitness trainer Sarah Johnson and nutritionist Emma Chen, who recognized a significant gap in the fitness industry: programs designed specifically for women&apos;s unique physiological needs and goals.
               </p>
               <p className="text-neutral-600 mb-4">
                 Having worked with hundreds of female clients, they understood that women often face different challenges when it comes to fitness and nutrition—from hormonal fluctuations to societal pressures and busy schedules balancing careers and family responsibilities.
@@ -92,7 +92,7 @@ export default function AboutPage() {
               </div>
               <h3 className="text-xl mb-3">Science-Based Approach</h3>
               <p className="text-neutral-600">
-                Our programs are backed by research and created by certified professionals who understand women's physiology and nutritional needs.
+                Our programs are backed by research and created by certified professionals who understand women&apos;s physiology and nutritional needs.
               </p>
             </div>
             
@@ -145,7 +145,7 @@ export default function AboutPage() {
           <div className="max-w-3xl mx-auto text-center mb-16">
             <h2 className="mb-4">Our Team</h2>
             <p className="text-lg text-neutral-600">
-              Meet the experts behind SheShape's transformative programs
+              Meet the experts behind SheShape&apos;s transformative programs
             </p>
           </div>
           
@@ -163,7 +163,7 @@ export default function AboutPage() {
               <h3 className="text-xl mb-1">Sarah Johnson</h3>
               <p className="text-primary font-medium mb-3">Co-Founder & Head Trainer</p>
               <p className="text-neutral-600 max-w-sm mx-auto">
-                Certified personal trainer with 10+ years of experience specializing in women's fitness and strength training.
+                Certified personal trainer with 10+ years of experience specializing in women&apos;s fitness and strength training.
               </p>
             </div>
             
@@ -180,7 +180,7 @@ export default function AboutPage() {
               <h3 className="text-xl mb-1">Emma Chen</h3>
               <p className="text-primary font-medium mb-3">Co-Founder & Head Nutritionist</p>
               <p className="text-neutral-600 max-w-sm mx-auto">
-                Registered dietitian with a specialization in women's nutritional needs and holistic wellness approaches.
+                Registered dietitian with a specialization in women&apos;s nutritional needs and holistic wellness approaches.
               </p>
             </div>
             

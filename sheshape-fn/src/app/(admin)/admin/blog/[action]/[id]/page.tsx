@@ -95,6 +95,7 @@ export default function BlogEditPage({
         response = await api.put(`/api/blog/posts/${postId}`, blogPost);
       } else {
         response = await api.post('/api/blog/posts', blogPost);
+        console.log(response);
       }
       
       toast.success(`Blog post ${isEditing ? 'updated' : 'created'} successfully`);

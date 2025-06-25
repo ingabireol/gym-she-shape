@@ -122,3 +122,13 @@ export interface ProductImage {
     product?: Product;
     addedAt: string;
   }
+  export interface ProductFormData {
+  name: string;
+  description: string;
+  price: number;
+  discountPrice?: number;
+  inventoryCount: number;
+  categories: string[];
+  isActive: boolean;
+  images?: File[];
+}

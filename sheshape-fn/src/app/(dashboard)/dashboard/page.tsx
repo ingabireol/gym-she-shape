@@ -1,7 +1,6 @@
 // src/app/(dashboard)/dashboard/page.tsx
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { 
@@ -74,7 +73,7 @@ export default function DashboardPage() {
           Welcome back, {user?.profile?.firstName || user?.username}! 💪
         </h1>
         <p className="text-primary-100 mb-4">
-          Ready to continue your fitness journey? You're doing amazing!
+          Ready to continue your fitness journey? You&apos;re doing amazing!
         </p>
         <div className="flex flex-wrap gap-4">
           <div className="flex items-center">
@@ -221,7 +220,7 @@ export default function DashboardPage() {
                   <Progress value={plan.progress} className="mb-3" />
                   <div className="flex justify-between items-center">
                     <p className="text-sm text-neutral-600">
-                      Today's meals: {plan.todaysMeals}/3
+                      Today&apos;s meals: {plan.todaysMeals}/3
                     </p>
                     <Button size="sm" variant="outline" asChild>
                       <Link href={`/my-nutrition/${plan.id}`}>
@@ -288,11 +287,11 @@ export default function DashboardPage() {
             <div>
               <h3 className="text-lg font-semibold mb-2">Keep up the great work! 🌟</h3>
               <p className="text-neutral-600 mb-4">
-                You're {stats.weekStreak} days into your fitness streak. Every workout brings you closer to your goals!
+                You&apos;re {stats.weekStreak} days into your fitness streak. Every workout brings you closer to your goals!
               </p>
               <Button asChild>
                 <Link href="/my-programs">
-                  Start Today's Workout
+                  Start Today&apos;s Workout
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>

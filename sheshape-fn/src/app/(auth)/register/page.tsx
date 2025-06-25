@@ -1,7 +1,6 @@
 'use client';
 
 import { RegisterForm } from '@/components/auth/RegisterForm';
-import { CartDrawer } from '@/components/shop/CartDrawer';
 
 export default function RegisterPage() {
   return (

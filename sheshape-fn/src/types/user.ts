@@ -54,7 +54,7 @@ export interface UserProfile {
 }
 
 // Legacy Profile interface for backward compatibility
-export interface Profile extends UserProfile {}
+// export interface Profile extends UserProfile {}
 
 // Simplified profile update interface for basic operations
 export interface BasicProfileUpdate {

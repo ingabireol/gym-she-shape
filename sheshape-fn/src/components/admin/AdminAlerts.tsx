@@ -2,8 +2,6 @@
 
 import { useState } from 'react';
 import { 
-  AlertCircle, 
-  AlertTriangle,
   ShoppingBag, 
   Package,
   ServerOff,

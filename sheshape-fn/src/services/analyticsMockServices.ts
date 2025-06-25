@@ -19,7 +19,7 @@ export const generateMockAnalyticsData = (fromDate: Date | undefined, toDate: Da
       const step = Math.max(1, Math.floor(days / maxPoints));
       
       const dates = [];
-      let currentDate = new Date(start);
+      const currentDate = new Date(start);
       
       while (currentDate <= end) {
         dates.push(new Date(currentDate));

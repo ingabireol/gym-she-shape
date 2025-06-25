@@ -51,7 +51,7 @@ export function CTASection() {
               transition={{ duration: 0.5, delay: 0.1 }}
               viewport={{ once: true }}
             >
-              Join thousands of women who have transformed their lives with SheShape's comprehensive fitness and wellness platform.
+              Join thousands of women who have transformed their lives with SheShape&apos;s comprehensive fitness and wellness platform.
             </motion.p>
             
             <motion.div 

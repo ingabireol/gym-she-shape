@@ -6,7 +6,6 @@ import Image from 'next/image';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -75,7 +74,7 @@ export function PasswordResetForm() {
         </div>
         <CardTitle className="text-2xl">Reset your password</CardTitle>
         <CardDescription>
-          Enter your email address and we'll send you instructions to reset your password
+          Enter your email address and we&apos;ll send you instructions to reset your password
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">

@@ -18,14 +18,14 @@ interface RegisterRequest {
   role?: string;
 }
 
-interface PasswordResetRequest {
-  email: string;
-}
+// interface PasswordResetRequest {
+//   email: string;
+// }
 
-interface PasswordUpdateRequest {
-  current: string;
-  new: string;
-}
+// interface PasswordUpdateRequest {
+//   current: string;
+//   new: string;
+// }
 
 interface ProfileUpdateRequest {
   firstName?: string;

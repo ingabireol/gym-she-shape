@@ -6,8 +6,6 @@ import {
   Utensils, 
   Users, 
   PlayCircle, 
-  ShoppingBag, 
-  FileText, 
   Heart,
   Zap,
   Target,

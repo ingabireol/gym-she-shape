@@ -1,7 +1,6 @@
 'use client';
 
 import { LoginForm } from '@/components/auth/LoginForm';
-import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { CartDrawer } from '@/components/shop/CartDrawer';
 
 export default function LoginPage() {

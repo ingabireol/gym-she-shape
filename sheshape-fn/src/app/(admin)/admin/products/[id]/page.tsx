@@ -20,14 +20,11 @@ import {
   ArrowLeft, 
   Edit, 
   Trash, 
-  ShoppingBag, 
   Package, 
   Calendar,
   DollarSign, 
   Tag,
   Clock,
-  Check,
-  X,
   AlertTriangle,
   Eye
 } from 'lucide-react';
@@ -116,9 +113,9 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
   }
   
   // Get main image
-  const mainImage = product.images && product.images.length > 0 
-    ? product.images.find(img => img.isMain) || product.images[0] 
-    : null;
+  // const mainImage = product.images && product.images.length > 0 
+  //   ? product.images.find(img => img.isMain) || product.images[0] 
+  //   : null;
 
   return (
     <div className="space-y-6">
